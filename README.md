@@ -26,11 +26,21 @@ Layers turn grayscale on import: dark areas become heavy ink, light areas become
 - **Shading** — riso can't print grey, only dots. **Dot screen** is classic printshop dots on a rotated grid; **Grain** is scattered stipple like modern riso output; **Gradient** keeps smooth continuous tone. In dot-screen mode *Auto angles* will try to prevent moiré patterns, or you can set manually.
 - **Registration jitter** — every pass through a real machine is unique. The amount is a % of the sheet's larger edge, so it stays visible at any paper size; real machines drift ~0–2 mm per pass, and the default (0.34% ≈ 1 mm on A4) sits right in that range. The preview is stable and the export matches it exactly. Hit **Re-roll** (bottom left) for a different accident.
 - **Ink blending** — how overlapping inks mix. **Realistic** is the good one (next section). **Simple** is multiply blending weighted by each ink's actual opacity — Black covers, Yellow dyes. **Off** treats every ink like coloured cellophane.
-- **Advanced layer options** — per-layer opacity, scale, and X/Y offset controls, maybe too much control.
+- **Advanced layer options** — reveals per-layer opacity, scale, and X/Y offset boxes on each layer, maybe too much control. (Compose mode sets scale and offset for you by dragging — see below — so you don't have to poke numbers unless you want to.)
 
 | Grain | Dot screen |
 |---|---|
 | ![Grain halftone gradient](docs/demo-halftone-stochastic.png) | ![Dot screen halftone gradient](docs/demo-halftone-am.png) |
+
+### Compose mode
+
+Lining layers up by typing X/Y numbers is a pain, so hit **Compose** (bottom left) to lay them out by hand instead. The preview turns into a light-table: every layer becomes a coloured outline with its artwork faintly showing through, so you can see exactly how they stack and where the edges fall.
+
+- **Pick a layer** by clicking it — in the preview, or on its radio dot in the sidebar. The selected one gets a bolder outline and little grab-squares at its corners.
+- **Drag it** anywhere on the canvas to move it, or **drag a corner** to resize it (it scales from the opposite corner, keeping its proportions).
+- The layer's **scale and offset update live** as you go, so whatever you nudge into place is exactly what prints — no need to flip on the advanced options first.
+
+Zoom is locked to *Fit* while you're composing. Hit **Exit compose mode** to get back to the normal preview with everything where you left it.
 
 ## Working on it
 - React 19 + TypeScript + Vite, no state library.
