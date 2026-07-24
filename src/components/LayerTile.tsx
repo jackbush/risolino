@@ -14,6 +14,9 @@ interface LayerTileProps {
   layer: Layer;
   advancedEnabled: boolean;
   paperColor?: string;
+  composeMode: boolean;
+  selected: boolean;
+  onSelect: () => void;
   onRemove: () => void;
   onNameChange: (name: string) => void;
   onColorChange: (inkColor: InkColor) => void;
@@ -27,6 +30,9 @@ export function LayerTile({
   layer,
   advancedEnabled,
   paperColor,
+  composeMode,
+  selected,
+  onSelect,
   onRemove,
   onNameChange,
   onColorChange,
@@ -111,16 +117,40 @@ export function LayerTile({
   }
 
   return (
-    <div className="layer-tile" ref={setNodeRef} style={style}>
-      {/* Drag handle */}
-      <span
-        className="layer-drag-handle"
-        {...attributes}
-        {...listeners}
-        title="Drag to reorder"
-      >
-        ⠿
-      </span>
+    <div
+      className={`layer-tile${selected ? ' layer-tile--selected' : ''}`}
+      ref={setNodeRef}
+      style={style}
+      onClick={composeMode ? onSelect : undefined}
+    >
+      {/* Drag handle → selection radio while composing */}
+      {composeMode ? (
+        <span
+          className="layer-select-radio"
+          role="radio"
+          aria-checked={selected}
+          tabIndex={0}
+          title="Select layer to compose"
+          onClick={onSelect}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onSelect();
+            }
+          }}
+        >
+          {selected ? '◉' : '○'}
+        </span>
+      ) : (
+        <span
+          className="layer-drag-handle"
+          {...attributes}
+          {...listeners}
+          title="Drag to reorder"
+        >
+          ⠿
+        </span>
+      )}
 
       {/* Image preview */}
       <div

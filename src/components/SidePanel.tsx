@@ -8,9 +8,20 @@ interface SidePanelProps {
   actions: LayerActions;
   config: RisoConfig;
   onConfigChange: (updates: Partial<RisoConfig>) => void;
+  composeMode: boolean;
+  selectedLayerId: string | null;
+  onSelectLayer: (id: string) => void;
 }
 
-export function SidePanel({ layers, actions, config, onConfigChange }: SidePanelProps) {
+export function SidePanel({
+  layers,
+  actions,
+  config,
+  onConfigChange,
+  composeMode,
+  selectedLayerId,
+  onSelectLayer,
+}: SidePanelProps) {
   return (
     <div className="side-panel">
       <details className="pane pane--setup" open>
@@ -23,7 +34,15 @@ export function SidePanel({ layers, actions, config, onConfigChange }: SidePanel
       <details className="pane pane--layers" open>
         <summary className="pane-summary">Layers</summary>
         <div className="pane-body">
-          <LayerList layers={layers} actions={actions} advancedEnabled={config.advancedLayerOptionsEnabled} paperColor={config.paperColor} />
+          <LayerList
+            layers={layers}
+            actions={actions}
+            advancedEnabled={config.advancedLayerOptionsEnabled}
+            paperColor={config.paperColor}
+            composeMode={composeMode}
+            selectedLayerId={selectedLayerId}
+            onSelectLayer={onSelectLayer}
+          />
         </div>
       </details>
     </div>

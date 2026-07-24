@@ -10,7 +10,8 @@ Drop in some images, stack them up as ink layers, and watch them overprint with 
 2. **Click a layer's colour strip** and pick an ink. The palette is based on real riso inks.
 3. **Fiddle with the setup** until it feels like a print, not a screen.
 4. **Check the details** The zoomed-out preview can shimmer. Click on the preview (or hit **100%**) to inspect and pan around.
-5. **Download** a full-resolution PNG.
+5. **Compose** (bottom left) turns the preview into a light-table: every layer becomes a coloured outline with its artwork faintly showing through. Pick a layer in the sidebar, then drag it around the canvas to reposition it or drag a corner to resize it — the offset and scale values update as you go. Hit **Exit compose mode** when you're happy.
+6. **Download** a full-resolution PNG.
 
 Layers turn grayscale on import: dark areas become heavy ink, light areas become bare paper. It's how a real riso sees your artwork, one colour separation at a time. Drag the handle to reorder layers (they print bottom to top), click the name to rename, click the thumbnail to swap the image.
 

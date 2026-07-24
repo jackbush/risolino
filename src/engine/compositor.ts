@@ -202,7 +202,7 @@ function computeDensity(
 // 0.3-1% of an A4/A3 edge — so 2% is the realistic range plus headroom.
 export const JITTER_MAX_PCT = 2;
 
-interface LayerPlacement {
+export interface LayerPlacement {
   drawX: number;
   drawY: number;
   drawW: number;
@@ -216,7 +216,7 @@ interface LayerPlacement {
  * layer offset and registration jitter (all scaled). Shared by the multiply
  * and Kubelka-Munk paths so both apply identical geometry.
  */
-function computeLayerPlacement(
+export function computeLayerPlacement(
   layer: Layer,
   config: RisoConfig,
   srcW: number,
@@ -226,11 +226,15 @@ function computeLayerPlacement(
   targetH: number,
   margin: number,
 ): LayerPlacement {
-  const layerScale = config.advancedLayerOptionsEnabled ? layer.scale : 1;
+  // Per-layer scale/offset always apply (defaults are neutral: scale 1,
+  // offset 0). The "Advanced layer options" toggle only controls whether their
+  // controls are *shown* in the layer tile — same as per-layer opacity — so
+  // Compose mode can edit these values without flipping any UI switch.
+  const layerScale = layer.scale;
 
   // Fit/fill: scale every layer to the paper's content area (margin excluded).
-  // The per-layer advanced scale multiplies on top, so a layer can be scaled
-  // twice, independently.
+  // The per-layer scale multiplies on top, so a layer can be scaled twice,
+  // independently.
   let fitScale = 1;
   if (config.layerFit !== 'off' && srcW > 0 && srcH > 0) {
     const pick = config.layerFit === 'fit' ? Math.min : Math.max;
@@ -239,13 +243,8 @@ function computeLayerPlacement(
 
   const drawW = srcW * scale * fitScale * layerScale;
   const drawH = srcH * scale * fitScale * layerScale;
-  let drawX = margin + (targetW - drawW) / 2;
-  let drawY = margin + (targetH - drawH) / 2;
-
-  if (config.advancedLayerOptionsEnabled) {
-    drawX += layer.offsetX * scale;
-    drawY += layer.offsetY * scale;
-  }
+  let drawX = margin + (targetW - drawW) / 2 + layer.offsetX * scale;
+  let drawY = margin + (targetH - drawH) / 2 + layer.offsetY * scale;
 
   // Registration jitter (scaled): random per-layer shift, keyed by layer id
   // + seed so it's stable across re-renders and only changes on an explicit

@@ -14,6 +14,8 @@ export function App() {
   const layersRef = useRef(layers);
   layersRef.current = layers;
   const [zoomMode, setZoomMode] = useState<ZoomMode>('fit');
+  const [composeMode, setComposeMode] = useState(false);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
 
   const [config, setConfig] = useState<RisoConfig>({
     advancedLayerOptionsEnabled: false,
@@ -39,6 +41,20 @@ export function App() {
   function handleConfigChange(updates: Partial<RisoConfig>) {
     setConfig((prev) => ({ ...prev, ...updates }));
   }
+
+  function enterCompose() {
+    setComposeMode(true);
+    setZoomMode('fit'); // compose is always fit; no zoom behaviour
+  }
+
+  function exitCompose() {
+    setComposeMode(false);
+    setSelectedLayerId(null);
+  }
+
+  const selectedLayer = composeMode
+    ? layers.find((l) => l.id === selectedLayerId) ?? null
+    : null;
 
   const handleDrop = useCallback(
     (e: DragEvent) => {
@@ -92,17 +108,29 @@ export function App() {
         layers={layers}
         config={config}
         zoomMode={zoomMode}
-        onZoomModeChange={setZoomMode}
+        onZoomModeChange={(m) => {
+          if (!composeMode) setZoomMode(m);
+        }}
         onExport={() => exportFullRes(layers, config)}
         onRerollJitter={() =>
           handleConfigChange({ registrationJitterSeed: Math.floor(Math.random() * 2 ** 31) })
         }
+        composeMode={composeMode}
+        selectedLayer={selectedLayer}
+        onCompose={enterCompose}
+        onExitCompose={exitCompose}
+        onSelectLayer={setSelectedLayerId}
+        onLayerOffsetChange={actions.updateLayerOffset}
+        onLayerScaleChange={actions.updateLayerScale}
       />
       <SidePanel
         layers={layers}
         actions={actions}
         config={config}
         onConfigChange={handleConfigChange}
+        composeMode={composeMode}
+        selectedLayerId={selectedLayerId}
+        onSelectLayer={setSelectedLayerId}
       />
     </div>
   );

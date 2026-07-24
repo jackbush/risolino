@@ -24,9 +24,20 @@ interface LayerListProps {
   actions: LayerActions;
   advancedEnabled: boolean;
   paperColor?: string;
+  composeMode: boolean;
+  selectedLayerId: string | null;
+  onSelectLayer: (id: string) => void;
 }
 
-export function LayerList({ layers, actions, advancedEnabled, paperColor }: LayerListProps) {
+export function LayerList({
+  layers,
+  actions,
+  advancedEnabled,
+  paperColor,
+  composeMode,
+  selectedLayerId,
+  onSelectLayer,
+}: LayerListProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
@@ -76,6 +87,9 @@ export function LayerList({ layers, actions, advancedEnabled, paperColor }: Laye
                 layer={layer}
                 advancedEnabled={advancedEnabled}
                 paperColor={paperColor}
+                composeMode={composeMode}
+                selected={selectedLayerId === layer.id}
+                onSelect={() => onSelectLayer(layer.id)}
                 onRemove={() => actions.removeLayer(layer.id)}
                 onNameChange={(name: string) => actions.updateLayerName(layer.id, name)}
                 onColorChange={(ink: InkColor) => actions.updateLayerColor(layer.id, ink)}

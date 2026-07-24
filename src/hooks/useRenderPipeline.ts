@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { Layer, RisoConfig } from '../types';
-import { render, getCompositeDimensions } from '../engine/renderer';
+import { render, renderOutline, getCompositeDimensions } from '../engine/renderer';
 
 const DEBOUNCE_MS = 150;
 
@@ -13,6 +13,8 @@ export interface RenderPipelineControls {
   setCenterFraction: (fx: number, fy: number) => void;
   /** Current viewport center as fractions (0-1) of the composite. */
   getCenterFraction: () => { fx: number; fy: number };
+  /** Fit scale (canvas px per full-res px) of the last render. 1 in 100% mode. */
+  getResultScale: () => number;
 }
 
 /**
@@ -32,6 +34,8 @@ export function useRenderPipeline(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   containerRef: React.RefObject<HTMLDivElement | null>,
   mode: ZoomMode,
+  composeMode: boolean,
+  selectedLayerId: string | null,
   onRender?: () => void,
 ): RenderPipelineControls {
   const timerRef = useRef<number | undefined>(undefined);
@@ -41,10 +45,14 @@ export function useRenderPipeline(
   const layersRef = useRef(layers);
   const configRef = useRef(config);
   const modeRef = useRef(mode);
+  const composeModeRef = useRef(composeMode);
+  const selectedLayerIdRef = useRef(selectedLayerId);
   const onRenderRef = useRef(onRender);
   layersRef.current = layers;
   configRef.current = config;
   modeRef.current = mode;
+  composeModeRef.current = composeMode;
+  selectedLayerIdRef.current = selectedLayerId;
   onRenderRef.current = onRender;
 
   // Last composited result and the 100% viewport center (fractions of the
@@ -110,6 +118,9 @@ export function useRenderPipeline(
 
   const scheduleRender = useCallback(() => {
     window.clearTimeout(timerRef.current);
+    // Compose mode renders at fit scale and must feel live under drag, so skip
+    // the debounce — the outline render (no halftone/tint/KM) is cheap.
+    const delay = composeModeRef.current ? 0 : DEBOUNCE_MS;
     timerRef.current = window.setTimeout(() => {
       const container = containerRef.current;
       if (!container) return;
@@ -118,7 +129,7 @@ export function useRenderPipeline(
       if (!currentLayers.some((l) => l.grayscaleData)) return;
 
       let scale = 1;
-      if (modeRef.current === 'fit') {
+      if (modeRef.current === 'fit' || composeModeRef.current) {
         const { width: fullW, height: fullH } = getCompositeDimensions(
           currentLayers,
           configRef.current.paperSize,
@@ -136,11 +147,13 @@ export function useRenderPipeline(
         );
       }
 
-      resultRef.current = render(currentLayers, configRef.current, scale);
+      resultRef.current = composeModeRef.current
+        ? renderOutline(currentLayers, configRef.current, selectedLayerIdRef.current, scale)
+        : render(currentLayers, configRef.current, scale);
       resultScaleRef.current = scale;
       present();
       onRenderRef.current?.();
-    }, DEBOUNCE_MS);
+    }, delay);
   }, [containerRef, present]);
 
   const panBy = useCallback(
@@ -160,12 +173,15 @@ export function useRenderPipeline(
 
   const getCenterFraction = useCallback(() => ({ ...centerRef.current }), []);
 
-  // Re-composite when layers, config, or zoom mode change (mode changes the
-  // render resolution, so a re-composite — not just a re-blit — is needed)
+  const getResultScale = useCallback(() => resultScaleRef.current, []);
+
+  // Re-composite when layers, config, zoom mode, or compose selection change
+  // (each changes what — or at what resolution — we draw, so a re-composite,
+  // not just a re-blit, is needed).
   useEffect(() => {
     scheduleRender();
     return () => window.clearTimeout(timerRef.current);
-  }, [layers, config, mode, scheduleRender]);
+  }, [layers, config, mode, composeMode, selectedLayerId, scheduleRender]);
 
   // On container resize: fit mode needs a re-composite at the new scale;
   // full mode just re-blits the viewport at the new size.
@@ -180,5 +196,5 @@ export function useRenderPipeline(
     return () => ro.disconnect();
   }, [containerRef, scheduleRender, present]);
 
-  return { panBy, setCenterFraction, getCenterFraction };
+  return { panBy, setCenterFraction, getCenterFraction, getResultScale };
 }

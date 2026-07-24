@@ -1,5 +1,6 @@
 import { Layer, RisoConfig } from '../types';
 import { composite } from './compositor';
+import { compositeOutline } from './compose';
 
 const MAX_DIMENSION = 6400;
 const DEFAULT_WIDTH = 800;
@@ -60,6 +61,24 @@ export function render(
   const targetH = Math.round(fullH * scale);
 
   return composite(layers, config, targetW, targetH, fullW);
+}
+
+/**
+ * Compose (outline) render: preview-only light-table view. Sizes the canvas
+ * like `render()` but delegates to the outline compositor. `selectedId` bolds
+ * one layer's frame.
+ */
+export function renderOutline(
+  layers: Layer[],
+  config: RisoConfig,
+  selectedId: string | null,
+  scale = 1,
+): HTMLCanvasElement {
+  const { width: fullW, height: fullH } = getCompositeDimensions(layers, config.paperSize);
+  const targetW = Math.round(fullW * scale);
+  const targetH = Math.round(fullH * scale);
+
+  return compositeOutline(layers, config, targetW, targetH, fullW, selectedId);
 }
 
 /**
