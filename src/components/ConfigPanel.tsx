@@ -50,6 +50,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           <option value="smallest">Smallest layer</option>
           <option value="a3">Zine (A3 300dpi)</option>
           <option value="a4">Drawing (A4 300dpi)</option>
+          <option value="ogimage">OG:Image (1200×630px)</option>
         </select>
       </label>
 

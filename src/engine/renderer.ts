@@ -7,9 +7,10 @@ const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 600;
 
 // Fixed sheets at 300dpi: zine spread (A3 landscape), drawing (A4 portrait)
-const FIXED_PAPER_SIZES: Record<'a3' | 'a4', { width: number; height: number }> = {
+const FIXED_PAPER_SIZES: Record<'a3' | 'a4' | 'ogimage', { width: number; height: number }> = {
   a4: { width: 2480, height: 3508 }, // 210 × 297 mm portrait
   a3: { width: 4961, height: 3508 }, // 420 × 297 mm landscape
+  ogimage: { width: 1200, height: 630 }, // Open Graph social preview image
 };
 
 /**
@@ -26,7 +27,8 @@ export function getCompositeDimensions(
   width: number;
   height: number;
 } {
-  if (paperSize === 'a3' || paperSize === 'a4') return { ...FIXED_PAPER_SIZES[paperSize] };
+  if (paperSize === 'a3' || paperSize === 'a4' || paperSize === 'ogimage')
+    return { ...FIXED_PAPER_SIZES[paperSize] };
 
   let w = 0;
   let h = 0;
