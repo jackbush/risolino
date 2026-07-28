@@ -1,4 +1,4 @@
-# RISO
+![Cover image](docs/cover.png)
 
 In 1980s Japan a screen printer and a photocopier had a baby: it prints one vivid ink at a time, so a multi-colour print means feeding the same sheet through again and again. The layers never quite line up, the inks are semi-transparent and mix where they overlap, and the whole thing has a warm, slightly-off charm that a normal printer can't do.
 
