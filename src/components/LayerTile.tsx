@@ -221,7 +221,7 @@ export function LayerTile({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif"
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />

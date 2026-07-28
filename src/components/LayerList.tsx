@@ -16,7 +16,7 @@ import {
 import { Layer, InkColor } from '../types';
 import { LayerActions, MAX_LAYERS } from '../hooks/useLayerState';
 import { LayerTile } from './LayerTile';
-import { loadImageFile } from '../engine/imageLoader';
+import { loadImageFile, isHeicFile } from '../engine/imageLoader';
 import { loadPdfFile } from '../engine/pdfLoader';
 
 interface LayerListProps {
@@ -62,7 +62,7 @@ export function LayerList({
           (pages) => pages.forEach((p) => actions.addLayerWithImage(p.grayscaleData)),
           (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
         );
-      } else if (file.type.startsWith('image/')) {
+      } else if (file.type.startsWith('image/') || isHeicFile(file)) {
         loadImageFile(file).then(
           (result) => actions.addLayerWithImage(result.grayscaleData),
           (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
@@ -108,7 +108,7 @@ export function LayerList({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*,application/pdf"
+        accept="image/*,.heic,.heif,application/pdf"
         multiple
         style={{ display: 'none' }}
         onChange={handleFilesSelected}

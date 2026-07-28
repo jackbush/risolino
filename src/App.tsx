@@ -3,7 +3,7 @@ import { PreviewPane } from './components/PreviewPane';
 import { SidePanel } from './components/SidePanel';
 import { useLayerState, MAX_LAYERS } from './hooks/useLayerState';
 import { exportFullRes } from './engine/renderer';
-import { loadImageFile } from './engine/imageLoader';
+import { loadImageFile, isHeicFile } from './engine/imageLoader';
 import { loadPdfFile } from './engine/pdfLoader';
 import { RisoConfig } from './types';
 import { ZoomMode } from './hooks/useRenderPipeline';
@@ -69,7 +69,7 @@ export function App() {
             (pages) => pages.forEach((p) => actions.addLayerWithImage(p.grayscaleData)),
             (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
           );
-        } else if (file.type.startsWith('image/')) {
+        } else if (file.type.startsWith('image/') || isHeicFile(file)) {
           loadImageFile(file).then(
             (result) => actions.addLayerWithImage(result.grayscaleData),
             (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
