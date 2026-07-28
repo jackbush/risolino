@@ -2,12 +2,69 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>RISO — Risograph print emulator</title>
+        <meta
+            name="description"
+            content="Risograph print emulator with realistic ink blending, registration jitter, shading models and general analogue charm."
+        />
+        <meta
+            name="keywords"
+            content="risograph, riso, print emulator, halftone, ink blending, Kubelka-Munk, dot screen, overprint, zine, screen printing"
+        />
+        <meta name="author" content="Jack Bush" />
+        <meta name="theme-color" content="#f2ecd9" />
+        <link rel="canonical" href="https://jackbush.github.io/riso/" />
+
+        <!-- Favicons -->
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        <!-- Open Graph (Facebook, Slack, Discord, LinkedIn, iMessage…) -->
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="RISO" />
+        <meta property="og:title" content="RISO — Risograph print emulator" />
+        <meta
+            property="og:description"
+            content="Risograph print emulator with realistic ink blending, registration jitter, shading models and general analogue charm."
+        />
+        <meta property="og:url" content="https://jackbush.github.io/riso/" />
+        <meta property="og:image" content="https://jackbush.github.io/riso/og-cover.jpg" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Overprinted riso inks spelling ‘Riso’ in warm orange, yellow, pink and green." />
+
+        <!-- Twitter / X -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="RISO — Risograph print emulator" />
+        <meta
+            name="twitter:description"
+            content="Risograph print emulator with realistic ink blending, registration jitter, shading models and general analogue charm."
+        />
+        <meta name="twitter:image" content="https://jackbush.github.io/riso/og-cover.jpg" />
+        <meta name="twitter:image:alt" content="Overprinted riso inks spelling ‘Riso’ in warm orange, yellow, pink and green." />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>RISO</title>
+
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "RISO",
+                "url": "https://jackbush.github.io/riso/",
+                "applicationCategory": "DesignApplication",
+                "operatingSystem": "Any (web browser)",
+                "browserRequirements": "Requires a modern browser with canvas support",
+                "description": "Risograph print emulator with realistic ink blending, registration jitter, shading models and general analogue charm.",
+                "image": "https://jackbush.github.io/riso/og-cover.jpg",
+                "author": { "@type": "Person", "name": "Jack Bush" },
+                "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+            }
+        </script>
     </head>
     <body>
         <div id="root"></div>
