@@ -9,7 +9,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        guides: 'guides/index.html',
+        manual: 'manual/index.html',
       },
     },
   },

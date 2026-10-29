@@ -4,26 +4,26 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Graphic print · Risolino guides</title>
+        <title>Graphic print · Risolino manual</title>
         <meta
             name="description"
             content="From a drawing to a riso-style print: draw each ink as its own sheet, scan them with your phone, and overprint them in Risolino."
         />
         <meta name="author" content="Jack Bush" />
         <meta name="theme-color" content="#fffdf5" />
-        <link rel="canonical" href="https://jackbush.github.io/risolino/guides/" />
+        <link rel="canonical" href="https://jackbush.github.io/risolino/manual/" />
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="RISOLINO" />
-        <meta property="og:title" content="Risolino guides" />
+        <meta property="og:title" content="Risolino manual" />
         <meta
             property="og:description"
             content="From a drawing to a riso-style print: draw each ink as its own sheet, scan them with your phone, and overprint them in Risolino."
         />
-        <meta property="og:url" content="https://jackbush.github.io/risolino/guides/" />
+        <meta property="og:url" content="https://jackbush.github.io/risolino/manual/" />
         <meta property="og:image" content="https://jackbush.github.io/risolino/og-cover.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -32,13 +32,13 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="./guide.css" />
+        <link rel="stylesheet" href="./manual.css" />
     </head>
     <body>
         <div class="layout">
-            <nav class="side" aria-label="Guide">
+            <nav class="side" aria-label="Manual">
                 <a class="side-back" href="../">← Risolino</a>
-                <p class="side-heading">Guides</p>
+                <p class="side-heading">Manual</p>
 
                 <p class="side-group" id="nav-walkthroughs">Walkthroughs</p>
                 <ul aria-labelledby="nav-walkthroughs">
@@ -67,7 +67,7 @@
                 </ul>
             </nav>
 
-            <main class="guide">
+            <main class="manual">
                 <article id="graphic" class="page" data-title="Graphic print">
                     <header>
                         <h1 tabindex="-1">Graphic print</h1>
@@ -372,7 +372,7 @@
                         </div>
 
                         <div class="setting">
-                            <h2>Scale layers</h2>
+                            <h2>Scale to paper</h2>
                             <div>
                                 <p>
                                     Resizes every layer to the sheet. <i>Fit</i> shrinks or grows each layer to fit inside the paper. <i>Fill</i> makes
@@ -524,7 +524,7 @@
                     <section class="setting-group">
                         <h2>Advanced layer options</h2>
                         <p>
-                            Turn on <b>Advanced layer options</b> at the bottom of <b>Setup</b> to add three controls to every layer. Turning it off
+                            Turn on <b>Advanced layer options</b> at the bottom of the <b>Layers</b> panel to add three controls to every layer. Turning it off
                             hides them again but keeps what you set. <i>Scale</i> and <i>Offset</i> are the typed version of <b>Compose</b>: drag a
                             layer there and these numbers change with it.
                         </p>
@@ -543,7 +543,7 @@
                         <h3>Scale</h3>
                         <div>
                             <p>
-                                Resizes the layer from 10% to 200% of its size. It applies on top of <a href="#paper">Scale layers</a>, so a layer fitted to the sheet can still be made bigger or smaller.
+                                Resizes the layer from 10% to 200% of its size. It applies on top of <a href="#paper">Scale to paper</a>, so a layer fitted to the sheet can still be made bigger or smaller.
                             </p>
                             <p class="start"><span>Start with</span> 100%, and resize by eye in <b>Compose</b>.</p>
                         </div>
@@ -563,6 +563,6 @@
             </main>
         </div>
 
-        <script type="module" src="./guide.ts"></script>
+        <script type="module" src="./manual.ts"></script>
     </body>
 </html>

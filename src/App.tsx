@@ -103,7 +103,7 @@ export function App() {
 
   return (
     <div className={`app${zoomMode === 'full' ? ' app--zoom-full' : ''}`}>
-      {isDragOver && <div className="drop-overlay">Drop image or PDF to add layers</div>}
+      {isDragOver && <div className="drop-overlay">Drop to add layers</div>}
       <PreviewPane
         layers={layers}
         config={config}

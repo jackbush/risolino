@@ -20,9 +20,22 @@ export function ColorPicker({ onSelect, onClose, currentColor, paperColor, onPre
         onClose();
       }
     }
+    // Escape backs out without choosing: drop the hover preview, then close.
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onPreview?.(null);
+        onClose();
+      }
+    }
     document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, [onClose]);
+    document.addEventListener('keydown', handleKeyDown);
+    // Start keyboard users on the current ink.
+    ref.current?.querySelector<HTMLButtonElement>('.color-picker-swatch--active')?.focus();
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose, onPreview]);
 
   const displayName = hoveredInk?.name ?? currentColor?.name ?? '';
 
@@ -30,6 +43,8 @@ export function ColorPicker({ onSelect, onClose, currentColor, paperColor, onPre
     <div
       className="color-picker"
       ref={ref}
+      role="dialog"
+      aria-label="Choose an ink"
       style={paperColor ? { backgroundColor: paperColor } : undefined}
       onMouseLeave={() => { setHoveredInk(null); onPreview?.(null); }}
     >
@@ -41,11 +56,15 @@ export function ColorPicker({ onSelect, onClose, currentColor, paperColor, onPre
             {group.inks.map((ink) => {
               const isActive = currentColor?.hex.toUpperCase() === ink.hex.toUpperCase();
               return (
-                <div
+                <button
+                  type="button"
                   key={ink.name}
                   className={`color-picker-swatch${isActive ? ' color-picker-swatch--active' : ''}`}
                   style={{ backgroundColor: ink.hex }}
+                  aria-label={ink.name}
+                  aria-pressed={isActive}
                   onMouseEnter={() => { setHoveredInk(ink); onPreview?.(ink); }}
+                  onFocus={() => { setHoveredInk(ink); onPreview?.(ink); }}
                   onClick={() => {
                     onSelect(ink);
                     onClose();

@@ -147,7 +147,7 @@ a:hover {
   color: #cfcfcf;
 }
 
-.guide {
+.manual {
   padding: 2.5rem clamp(1rem, 5vw, 4rem) 5rem;
 }
 
@@ -308,7 +308,7 @@ p + .setting {
     height: auto;
   }
 
-  .guide {
+  .manual {
     padding: 1.5rem var(--gutter) 4rem;
   }
 

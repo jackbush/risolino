@@ -6,7 +6,7 @@ Drop in some images, stack them up as ink layers, and watch them overprint with 
 
 ## How to use it
 
-New to it? The [guides](https://jackbush.github.io/risolino/guides/) walk through two prints from drawing to download, and explain [every setting](https://jackbush.github.io/risolino/guides/#page).
+New to it? The [manual](https://jackbush.github.io/risolino/manual/) walks through two prints from drawing to download, and explains [every setting](https://jackbush.github.io/risolino/manual/#page).
 
 1. **Drag images (or a PDF) onto the page.** Each image (or PDF page) becomes a layer.
 2. **Click a layer's colour strip** and pick an ink. The palette is based on real riso inks.
@@ -17,18 +17,19 @@ New to it? The [guides](https://jackbush.github.io/risolino/guides/) walk throug
 
 Layers turn grayscale on import: dark areas become heavy ink, light areas become bare paper. It's how a real riso sees your artwork, one colour separation at a time. Drag the handle to reorder layers (they print bottom to top), click the name to rename, click the thumbnail to swap the image.
 
+**Advanced layer options**, at the foot of the Layers panel once you have a layer, reveals per-layer opacity, scale, and X/Y offset boxes on each layer, maybe too much control. (Compose mode sets scale and offset for you by dragging — see below — so you don't have to poke numbers unless you want to.)
+
 ### The setup
 
 - **Paper size** — sized to your largest layer by default. *Smallest layer* crops everything down to it; *Zine* (A3 landscape) and *Drawing* (A4 portrait) are fixed 300dpi sheets.
 - **Paper color** — riso ink is translucent, so the paper glows through everything. The same print reads completely differently on Newsprint than on White.
-- **Scale layers** — *Fit* scales every layer to fit on the paper, *Fill* to cover it. The per-layer scale (advanced layer options) applies on top, independently.
+- **Scale to paper** — *Fit* scales every layer to fit on the paper, *Fill* to cover it. The per-layer scale (advanced layer options) applies on top, independently.
 - **Margin** — extra paper around the artwork.
 - **Safe area** — keeps ink away from the paper edge, like a real riso's unprintable rim.
 - **Ink spread** — ink soaks into paper and creeps past its edges (printers call it dot gain). A little of it takes the digital crispness off.
 - **Shading** — riso can't print grey, only dots. **Dot screen** is classic printshop dots on a rotated grid; **Grain** is scattered stipple like modern riso output; **Gradient** keeps smooth continuous tone. In dot-screen mode *Auto angles* will try to prevent moiré patterns, or you can set manually.
 - **Registration jitter** — every pass through a real machine is unique. The amount is a % of the sheet's larger edge, so it stays visible at any paper size; real machines drift ~0–2 mm per pass, and the default (0.34% ≈ 1 mm on A4) sits right in that range. The preview is stable and the export matches it exactly. Hit **Re-roll** (bottom left) for a different accident.
 - **Ink blending** — how overlapping inks mix. **Realistic** is the good one (next section). **Simple** is multiply blending weighted by each ink's actual opacity — Black covers, Yellow dyes. **Off** treats every ink like coloured cellophane.
-- **Advanced layer options** — reveals per-layer opacity, scale, and X/Y offset boxes on each layer, maybe too much control. (Compose mode sets scale and offset for you by dragging — see below — so you don't have to poke numbers unless you want to.)
 
 | Grain | Dot screen |
 |---|---|
@@ -47,7 +48,7 @@ Zoom is locked to *Fit* while you're composing. Hit **Exit compose mode** to get
 ## Working on it
 - React 19 + TypeScript + Vite, no state library.
 - Pushes to `main` deploy to GitHub Pages.
-- The guides are a second, static Vite page (`guides/index.html`, its images in `guides/img/`). Each of its pages is an `<article class="page">` whose id is its hash (`#graphic`, `#mushroom`, `#page`…); `guides/guide.ts` shows one at a time. Its downloadable demo files sit in `public/guides/` so they keep their names.
+- The manual is a second, static Vite page (`manual/index.html`, its images in `manual/img/`). Each of its pages is an `<article class="page">` whose id is its hash (`#graphic`, `#mushroom`, `#page`…); `manual/manual.ts` shows one at a time. Its downloadable demo files sit in `public/manual/` so they keep their names.
 ```
 npm install
 npm run dev      # Vite dev server

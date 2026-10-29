@@ -2,7 +2,7 @@ import { Layer, RisoConfig } from '../types';
 import { LayerActions } from '../hooks/useLayerState';
 import { LayerList } from './LayerList';
 import { ConfigPanel } from './ConfigPanel';
-import { SETTINGS_GUIDE_URL } from '../config/links';
+import { manualUrl } from '../config/links';
 
 interface SidePanelProps {
   layers: Layer[];
@@ -25,22 +25,16 @@ export function SidePanel({
 }: SidePanelProps) {
   return (
     <div className="side-panel">
+      <a className="pane manual-card" href={manualUrl('page')} target="_blank" rel="noopener noreferrer">
+        Manual
+        <svg className="manual-card-icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+          <path d="M7 4.5h8.5V13M15.5 4.5 4.5 15.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
+        </svg>
+        <span className="visually-hidden">(opens in a new tab)</span>
+      </a>
+
       <details className="pane pane--setup" open>
-        <summary className="pane-summary">
-          Setup
-          {/* A link is interactive content, so clicking it opens the settings
-              guide without toggling the pane. */}
-          <a
-            className="pane-help"
-            href={SETTINGS_GUIDE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="About the settings"
-            aria-label="About the settings"
-          >
-            [?]
-          </a>
-        </summary>
+        <summary className="pane-summary">Setup</summary>
         <div className="pane-body">
           <ConfigPanel config={config} onChange={onConfigChange} />
         </div>
@@ -53,6 +47,7 @@ export function SidePanel({
             layers={layers}
             actions={actions}
             advancedEnabled={config.advancedLayerOptionsEnabled}
+            onAdvancedChange={(enabled) => onConfigChange({ advancedLayerOptionsEnabled: enabled })}
             paperColor={config.paperColor}
             composeMode={composeMode}
             selectedLayerId={selectedLayerId}
@@ -60,6 +55,7 @@ export function SidePanel({
           />
         </div>
       </details>
+
     </div>
   );
 }

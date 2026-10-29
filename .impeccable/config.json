@@ -7,7 +7,7 @@
         "rule": "cream-palette",
         "value": "*",
         "files": [
-          "guides/index.html"
+          "manual/index.html"
         ],
         "createdAt": "2026-10-29T15:33:47.822Z",
         "reason": "Claude decided: page background is the app's own 'Eggshell' paper preset #FFFDF5 (ConfigPanel.tsx), its default paper; hover tint is its 'Natural' preset"

@@ -4,7 +4,7 @@ import { useRenderPipeline, ZoomMode } from '../hooks/useRenderPipeline';
 import { getCompositeDimensions } from '../engine/renderer';
 import { computeLayerPlacement } from '../engine/compositor';
 import { composePlacementConfig, computeCornerScale } from '../engine/compose';
-import { GUIDES_URL } from '../config/links';
+import { MANUAL_URL } from '../config/links';
 
 interface PreviewPaneProps {
   layers: Layer[];
@@ -511,15 +511,16 @@ export function PreviewPane({
     <div className="preview-pane" ref={containerRef}>
       {!canvasReady && (
         <div className="preview-empty">
-          <p>
-            Add layers to get started,
-            <br />
-            or{' '}
-            <a href={GUIDES_URL} target="_blank" rel="noopener noreferrer">
-              read the guides
-            </a>
-            .
-          </p>
+          <div className="preview-empty-sheet">
+            <p className="preview-empty-title">Drop images or a PDF</p>
+            <p>Each image, or each page of a PDF, becomes one ink layer. You can also use <b>Add layers</b>.</p>
+            <p>
+              New here?{' '}
+              <a href={MANUAL_URL} target="_blank" rel="noopener noreferrer">
+                Read the manual
+              </a>
+            </p>
+          </div>
         </div>
       )}
       <canvas

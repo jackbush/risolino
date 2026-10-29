@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { RisoConfig } from '../types';
 import { JITTER_MAX_PCT } from '../engine/compositor';
+import { ManualLink } from './ManualLink';
 
 const PAPER_PRESETS = [
   { name: 'White', hex: '#FFFFFF' },
@@ -37,6 +38,10 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
 
   return (
     <>
+      <p className="config-group">
+        Paper<ManualLink page="paper" topic="Paper settings" />
+      </p>
+
       {/* Paper size */}
       <label className="config-item config-item--row">
         <span className="config-label">Paper size</span>
@@ -63,6 +68,8 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             className="paper-color-swatch"
             style={{ backgroundColor: config.paperColor }}
             title="Paper presets"
+            aria-label="Paper presets"
+            aria-expanded={showPaperPalette}
             onClick={() => setShowPaperPalette((s) => !s)}
           />
           <input
@@ -85,6 +92,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
                   className={`paper-preset-swatch${config.paperColor.toUpperCase() === preset.hex.toUpperCase() ? ' paper-preset-swatch--active' : ''}`}
                   style={{ backgroundColor: preset.hex }}
                   title={preset.name}
+                  aria-label={preset.name}
                   onClick={() => {
                     onChange({ paperColor: preset.hex });
                     setShowPaperPalette(false);
@@ -96,9 +104,9 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </span>
       </div>
 
-      {/* Scale layers */}
+      {/* Scale to paper */}
       <label className="config-item config-item--row">
-        <span className="config-label">Scale layers</span>
+        <span className="config-label">Scale to paper</span>
         <select
           value={config.layerFit}
           onChange={(e) =>
@@ -143,6 +151,10 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </label>
 
+      <p className="config-group">
+        Ink<ManualLink page="ink" topic="Ink settings" />
+      </p>
+
       {/* Ink spread */}
       <label className="config-item config-item--row">
         <span className="config-label">Ink spread</span>
@@ -153,7 +165,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </label>
       {config.inkSpreadEnabled && (
-        <label className="config-item config-item--row">
+        <label className="config-item config-item--row config-item--sub">
           <span className="config-label">↳ Spread amount</span>
           <input
             type="range"
@@ -181,7 +193,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </select>
       </label>
       {config.halftoneMode === 'stochastic' && (
-        <label className="config-item config-item--row">
+        <label className="config-item config-item--row config-item--sub">
           <span className="config-label">↳ Grain size</span>
           <input
             type="range"
@@ -195,7 +207,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       )}
       {config.halftoneMode === 'am' && (
         <>
-          <label className="config-item config-item--row">
+          <label className="config-item config-item--row config-item--sub">
             <span className="config-label">↳ Dot spacing</span>
             <input
               type="range"
@@ -206,7 +218,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
               onChange={(e) => onChange({ halftoneSpacing: parseInt(e.target.value, 10) })}
             />
           </label>
-          <label className="config-item config-item--row">
+          <label className="config-item config-item--row config-item--sub">
             <span className="config-label">↳ Auto angles</span>
             <input
               type="checkbox"
@@ -215,7 +227,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             />
           </label>
           {config.halftoneAngle !== null && (
-            <label className="config-item config-item--row">
+            <label className="config-item config-item--row config-item--sub">
               <span className="config-label">↳ Screen angle (°)</span>
               <input
                 type="range"
@@ -240,7 +252,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </label>
       {config.registrationJitterEnabled && (
-        <label className="config-item config-item--row">
+        <label className="config-item config-item--row config-item--sub">
           <span className="config-label">↳ Jitter amount (%)</span>
           <input
             type="range"
@@ -268,7 +280,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </select>
       </label>
       {config.inkBlendMode === 'km' && (
-        <label className="config-item config-item--row">
+        <label className="config-item config-item--row config-item--sub">
           <span className="config-label">↳ Order weight</span>
           <input
             type="range"
@@ -281,15 +293,6 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </label>
       )}
 
-      {/* Advanced layer options */}
-      <label className="config-item config-item--row">
-        <span className="config-label">Advanced layer options</span>
-        <input
-          type="checkbox"
-          checked={config.advancedLayerOptionsEnabled}
-          onChange={(e) => onChange({ advancedLayerOptionsEnabled: e.target.checked })}
-        />
-      </label>
     </>
   );
 }

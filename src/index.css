@@ -1,7 +1,16 @@
 :root {
   --color-fg: #000000;
+  --color-soft: #555555;
   --color-border: #cccccc;
   --color-accent: #1a1a1a;
+  --color-paper: #fffdf5;
+  --color-tint: #f2ecd9;
+  /* The table the sheet lies on: a warm mid-grey, so every paper colour reads. */
+  --color-surface: #8b8984;
+  --sidebar-width: 360px;
+  /* A sheet lifting off the table, and the lighter lift of the floating buttons. */
+  --shadow-sheet: 0 1px 2px rgba(0, 0, 0, 0.18), 0 14px 36px -10px rgba(0, 0, 0, 0.45);
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 16px -6px rgba(0, 0, 0, 0.4);
   --spacing-xs: 0.2rem;
   --spacing-sm: 0.35rem;
   --spacing-md: 0.65rem;
@@ -20,8 +29,18 @@ body {
   width: 100%;
   height: 100%;
   font-family: var(--font-family);
-  background-color: #888888;
+  background-color: var(--color-surface);
   color: var(--color-fg);
+}
+
+::selection {
+  background: var(--color-fg);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 2px;
 }
 
 #root {
@@ -31,7 +50,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 1fr var(--sidebar-width);
   height: 100vh;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
@@ -45,12 +64,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(17, 17, 17, 0.55);
   color: #fff;
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-family: 'Michroma', sans-serif;
+  font-size: 1.75rem;
   pointer-events: none;
-  border: 3px dashed rgba(255, 255, 255, 0.6);
+  border: 2px dashed rgba(255, 255, 255, 0.75);
+  border-radius: var(--border-radius);
   margin: var(--spacing-md);
 }
 
@@ -64,7 +84,7 @@ body {
 .preview-canvas {
   max-width: 100%;
   max-height: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sheet);
   animation: fadeIn 0.2s ease-in;
   cursor: zoom-in;
 }
@@ -97,7 +117,7 @@ body {
   top: var(--spacing-md);
   right: var(--spacing-md);
   bottom: var(--spacing-md);
-  width: 360px;
+  width: var(--sidebar-width);
   z-index: 20;
 }
 
@@ -108,7 +128,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 15;
-  background: #888888;
+  background: var(--color-surface);
   overflow: hidden;
   pointer-events: none;
 }
@@ -124,14 +144,14 @@ body {
   z-index: 20;
   display: flex;
   align-items: stretch;
-  gap: 6px;
+  gap: var(--spacing-sm);
 }
 
 .zoom-controls,
 .download-btn,
 .reroll-btn,
 .compose-btn {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-float);
   border-radius: var(--border-radius);
 }
 
@@ -232,6 +252,18 @@ body {
   flex-shrink: 0;
 }
 
+/* Sits between the scrolling list and the add button, so it never scrolls away. */
+.layer-list-advanced {
+  flex-shrink: 0;
+  padding: var(--spacing-xs) 0 var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  cursor: default;
+}
+
+.layer-list-advanced label {
+  cursor: pointer;
+}
+
 .layer-tile {
   display: flex;
   align-items: center;
@@ -317,7 +349,7 @@ body {
 
 .layer-tile-field-label {
   font-size: 0.75rem;
-  color: #666;
+  color: var(--color-soft);
 }
 
 /* Sizing/border come from the shared input rules further down */
@@ -346,8 +378,9 @@ body {
 
 .pane-summary {
   font-family: 'Michroma', sans-serif;
-  font-size: 2rem;
-  padding: var(--spacing-md);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  padding: 0.7rem var(--spacing-md) 0.6rem;
   cursor: pointer;
   user-select: none;
   list-style: none;
@@ -361,22 +394,58 @@ body {
   display: none;
 }
 
-.pane--setup > .pane-summary {
+/* Manual card: the first thing in the sidebar, whole card is the link. */
+.manual-card {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.pane-help {
-  position: relative;
-  z-index: 100;
-  color: inherit;
+  gap: var(--spacing-md);
+  padding: 0.7rem var(--spacing-md);
+  color: var(--color-fg);
   text-decoration: none;
-  opacity: 0.2;
+  font-family: 'Michroma', sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.2;
 }
 
-.pane-help:hover {
+.manual-card-icon {
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.manual-card:hover .manual-card-icon {
   opacity: 0.4;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The (i) beside a heading or control that opens its page of the manual. */
+.manual-link {
+  display: inline-flex;
+  /* Optically centred on the capitals: 2px taller than cap height, hanging
+     1px below the baseline so it overshoots the caps equally top and bottom. */
+  vertical-align: -1px;
+  margin-left: 0.35em;
+  color: var(--color-soft);
+  border-radius: 50%;
+}
+
+.manual-link svg {
+  width: calc(1cap + 2px);
+  height: calc(1cap + 2px);
+  overflow: visible;
+}
+
+.manual-link:hover {
+  color: var(--color-fg);
 }
 
 .pane-body {
@@ -437,6 +506,26 @@ body {
 .config-label {
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+/* Section labels in Setup, matching the manual' grouping. */
+.config-group {
+  margin: var(--spacing-xs) 0 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-soft);
+}
+
+.config-group:first-child {
+  margin-top: 0;
+}
+
+/* Settings that refine the row above them (the ↳ rows). */
+.config-item--sub .config-label {
+  font-weight: 400;
+  color: var(--color-soft);
 }
 
 .config-hint {
@@ -633,6 +722,7 @@ button:disabled {
 .color-picker-swatch {
   width: 28px;
   height: 28px;
+  padding: 0;
   border-radius: 3px;
   border: none;
   box-sizing: border-box;
@@ -655,10 +745,14 @@ button:disabled {
 /* Layer tile extras */
 .layer-drag-handle {
   cursor: grab;
-  color: var(--color-fg);
+  color: var(--color-soft);
   font-size: 1rem;
   flex-shrink: 0;
   align-self: center;
+}
+
+.layer-drag-handle:hover {
+  color: var(--color-fg);
 }
 
 .layer-drag-handle:active {
@@ -682,11 +776,11 @@ button:disabled {
 
 .layer-remove-btn {
   background: none;
-  color: var(--color-fg);
-  width: 48px;
+  color: var(--color-soft);
+  width: 32px;
   height: auto;
   padding: 0;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   border: none;
   display: flex;
@@ -697,7 +791,7 @@ button:disabled {
 
 .layer-remove-btn:hover {
   background: none;
-  color: #666;
+  color: var(--color-fg);
 }
 
 .config-item--row {
@@ -706,7 +800,7 @@ button:disabled {
   justify-content: space-between;
   cursor: pointer;
   /* Uniform row height regardless of the control on the right */
-  min-height: 26px;
+  min-height: 24px;
 }
 
 .paper-color-control {
@@ -771,26 +865,57 @@ button:disabled {
   text-align: right;
 }
 
-/* Preview pane empty state: centred in the whole window, not just the
-   preview's grid cell. */
+/* Preview pane empty state: a blank sheet on the table, centred in the
+   preview area (the window minus the sidebar) whatever the scroll. */
 .preview-empty {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: calc(var(--sidebar-width) + var(--spacing-md));
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  color: #111111;
-  font-size: 0.875rem;
   pointer-events: none;
   padding: 1rem;
+}
+
+.preview-empty-sheet {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  width: min(20rem, 80%);
+  aspect-ratio: 1 / 1.414;
+  padding: 2.25rem;
+  background: var(--color-paper);
+  border-radius: 2px;
+  box-shadow: var(--shadow-sheet);
+  /* The dashed rim marks it as somewhere to drop. */
+  outline: 1px dashed rgba(0, 0, 0, 0.35);
+  outline-offset: -14px;
+  color: #222222;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.preview-empty-sheet p {
+  margin: 0;
+}
+
+.preview-empty-title {
+  font-family: 'Michroma', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.25;
+  text-wrap: balance;
+  color: var(--color-fg);
 }
 
 .preview-empty a {
   color: inherit;
   pointer-events: auto;
   text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
 /* Layer tile loading state */

@@ -12,7 +12,7 @@ function show(scrollToTop: boolean): void {
     if (link.hash === `#${current.id}`) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
-  document.title = `${current.dataset.title} · Risolino guides`;
+  document.title = `${current.dataset.title} · Risolino manual`;
   if (scrollToTop) {
     window.scrollTo(0, 0);
     // Screen readers start reading from the new page's heading.

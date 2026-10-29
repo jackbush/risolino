@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Layer, InkColor } from '../types';
@@ -7,6 +7,7 @@ import { loadImageFile } from '../engine/imageLoader';
 import { prefilterForScale } from '../engine/compositor';
 
 const PREVIEW_SIZE = 86;
+const PICKER_EDGE_GAP = 8;
 
 const clampOffset = (v: number) => Math.min(10000, Math.max(-10000, v));
 
@@ -49,6 +50,7 @@ export function LayerTile({
   const [isLoading, setIsLoading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(layer.name);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const originalColorRef = useRef(layer.inkColor);
 
   useEffect(() => {
@@ -97,6 +99,15 @@ export function LayerTile({
   useEffect(() => {
     if (!showPicker) setPickerPos(null);
   }, [showPicker]);
+
+  // The picker opens at the click, but the sidebar sits against the window's
+  // right edge: once it has a size, slide it left until it fits.
+  useLayoutEffect(() => {
+    const el = pickerRef.current;
+    if (!el || !pickerPos) return;
+    const overflow = el.getBoundingClientRect().right - (window.innerWidth - PICKER_EDGE_GAP);
+    el.style.left = `${pickerPos.left - Math.max(0, overflow)}px`;
+  }, [pickerPos]);
 
   function commitName() {
     const trimmed = nameDraft.trim();
@@ -147,6 +158,7 @@ export function LayerTile({
           {...attributes}
           {...listeners}
           title="Drag to reorder"
+          aria-label={`Reorder ${layer.name}`}
         >
           ⠿
         </span>
@@ -185,6 +197,9 @@ export function LayerTile({
           className="layer-tile-color-preview"
           style={{ backgroundColor: layer.inkColor.hex }}
           title={layer.inkColor.name}
+          aria-label={`Ink: ${layer.inkColor.name}. Change ink`}
+          aria-haspopup="dialog"
+          aria-expanded={showPicker}
           onClick={(e) => {
             if (!showPicker) {
               const openUpward = window.innerHeight - e.clientY < 325;
@@ -195,6 +210,7 @@ export function LayerTile({
         />
         {showPicker && pickerPos && (
           <div
+            ref={pickerRef}
             style={{
               position: 'fixed',
               left: pickerPos.left,
@@ -260,7 +276,7 @@ export function LayerTile({
               {layer.name}
             </span>
           )}
-          <button className="layer-remove-btn" onClick={onRemove} title="Remove layer">
+          <button type="button" className="layer-remove-btn" onClick={onRemove} title="Remove layer" aria-label={`Remove ${layer.name}`}>
             ×
           </button>
         </div>

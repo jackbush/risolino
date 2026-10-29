@@ -16,6 +16,7 @@ import {
 import { Layer, InkColor } from '../types';
 import { LayerActions, MAX_LAYERS } from '../hooks/useLayerState';
 import { LayerTile } from './LayerTile';
+import { ManualLink } from './ManualLink';
 import { loadImageFile, isHeicFile } from '../engine/imageLoader';
 import { loadPdfFile } from '../engine/pdfLoader';
 
@@ -23,6 +24,7 @@ interface LayerListProps {
   layers: Layer[];
   actions: LayerActions;
   advancedEnabled: boolean;
+  onAdvancedChange: (enabled: boolean) => void;
   paperColor?: string;
   composeMode: boolean;
   selectedLayerId: string | null;
@@ -33,6 +35,7 @@ export function LayerList({
   layers,
   actions,
   advancedEnabled,
+  onAdvancedChange,
   paperColor,
   composeMode,
   selectedLayerId,
@@ -113,6 +116,21 @@ export function LayerList({
         style={{ display: 'none' }}
         onChange={handleFilesSelected}
       />
+      {/* Only worth showing once there's a layer for it to act on. */}
+      {layers.length > 0 && (
+        <div className="config-item config-item--row layer-list-advanced">
+          <span className="config-label">
+            <label htmlFor="advanced-layer-options">Advanced layer options</label>
+            <ManualLink page="layers" topic="Layer options" />
+          </span>
+          <input
+            id="advanced-layer-options"
+            type="checkbox"
+            checked={advancedEnabled}
+            onChange={(e) => onAdvancedChange(e.target.checked)}
+          />
+        </div>
+      )}
       <button
         className="layer-list-add-btn"
         onClick={() => fileInputRef.current?.click()}
