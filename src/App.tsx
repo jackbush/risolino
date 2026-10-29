@@ -8,6 +8,7 @@ import { loadPdfFile } from './engine/pdfLoader';
 import { RisoConfig } from './types';
 import { ZoomMode } from './hooks/useRenderPipeline';
 import './index.css';
+import { DropPrompt } from './components/DropPrompt';
 
 export function App() {
   const { layers, ...actions } = useLayerState();
@@ -37,6 +38,10 @@ export function App() {
     safeArea: 0,
   });
   const [isDragOver, setIsDragOver] = useState(false);
+  // Esc abandons the drag in progress: the overlay goes, and letting go
+  // afterwards adds nothing. A drag that re-enters the window starts afresh.
+  // A ref, so it survives the effect below re-subscribing on re-render.
+  const dragAbortedRef = useRef(false);
 
   function handleConfigChange(updates: Partial<RisoConfig>) {
     setConfig((prev) => ({ ...prev, ...updates }));
@@ -81,29 +86,50 @@ export function App() {
   );
 
   useEffect(() => {
+    function onDragEnter(e: DragEvent) {
+      if (e.relatedTarget === null) dragAbortedRef.current = false;
+    }
     function onDragOver(e: DragEvent) {
       e.preventDefault();
-      setIsDragOver(true);
+      if (!dragAbortedRef.current) setIsDragOver(true);
     }
     function onDragLeave(e: DragEvent) {
       if (e.relatedTarget === null) setIsDragOver(false);
     }
     function onDrop(e: DragEvent) {
+      if (dragAbortedRef.current) {
+        e.preventDefault();
+        dragAbortedRef.current = false;
+        return;
+      }
       handleDrop(e);
     }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      dragAbortedRef.current = true;
+      setIsDragOver(false);
+    }
+    window.addEventListener('dragenter', onDragEnter);
     window.addEventListener('dragover', onDragOver);
     window.addEventListener('dragleave', onDragLeave);
     window.addEventListener('drop', onDrop);
+    window.addEventListener('keydown', onKeyDown);
     return () => {
+      window.removeEventListener('dragenter', onDragEnter);
       window.removeEventListener('dragover', onDragOver);
       window.removeEventListener('dragleave', onDragLeave);
       window.removeEventListener('drop', onDrop);
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [handleDrop]);
 
   return (
     <div className={`app${zoomMode === 'full' ? ' app--zoom-full' : ''}`}>
-      {isDragOver && <div className="drop-overlay">Drop to add layers</div>}
+      {isDragOver && (
+        <div className="drop-overlay">
+          <DropPrompt dropping />
+        </div>
+      )}
       <PreviewPane
         layers={layers}
         config={config}

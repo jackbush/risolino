@@ -4,7 +4,7 @@ import { useRenderPipeline, ZoomMode } from '../hooks/useRenderPipeline';
 import { getCompositeDimensions } from '../engine/renderer';
 import { computeLayerPlacement } from '../engine/compositor';
 import { composePlacementConfig, computeCornerScale } from '../engine/compose';
-import { MANUAL_URL } from '../config/links';
+import { DropPrompt } from './DropPrompt';
 
 interface PreviewPaneProps {
   layers: Layer[];
@@ -510,18 +510,7 @@ export function PreviewPane({
   return (
     <div className="preview-pane" ref={containerRef}>
       {!canvasReady && (
-        <div className="preview-empty">
-          <div className="preview-empty-sheet">
-            <p className="preview-empty-title">Drop images or a PDF</p>
-            <p>Each image, or each page of a PDF, becomes one ink layer. You can also use <b>Add layers</b>.</p>
-            <p>
-              New here?{' '}
-              <a href={MANUAL_URL} target="_blank" rel="noopener noreferrer">
-                Read the manual
-              </a>
-            </p>
-          </div>
-        </div>
+        <DropPrompt dropping={false} />
       )}
       <canvas
         className={`preview-canvas${zoomMode === 'full' ? ' preview-canvas--full' : ''}${
