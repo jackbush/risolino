@@ -1,1 +1,1 @@
-export const GUIDE_URL = 'https://jackbush.github.io/albums/risolino-guide/';
+export const GUIDE_URL = `${import.meta.env.BASE_URL}guide/`;

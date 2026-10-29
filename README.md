@@ -6,6 +6,8 @@ Drop in some images, stack them up as ink layers, and watch them overprint with 
 
 ## How to use it
 
+New to it? The [getting started guide](https://jackbush.github.io/risolino/guide/) walks through a print from drawing to download.
+
 1. **Drag images (or a PDF) onto the page.** Each image (or PDF page) becomes a layer.
 2. **Click a layer's colour strip** and pick an ink. The palette is based on real riso inks.
 3. **Fiddle with the setup** until it feels like a print, not a screen.
@@ -45,6 +47,7 @@ Zoom is locked to *Fit* while you're composing. Hit **Exit compose mode** to get
 ## Working on it
 - React 19 + TypeScript + Vite, no state library.
 - Pushes to `main` deploy to GitHub Pages.
+- The guide is a second, static Vite page (`guide/index.html`, its images in `guide/img/`). Its downloadable demo files sit in `public/guide/` so they keep their names.
 ```
 npm install
 npm run dev      # Vite dev server
