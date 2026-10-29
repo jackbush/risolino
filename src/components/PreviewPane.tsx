@@ -4,7 +4,7 @@ import { useRenderPipeline, ZoomMode } from '../hooks/useRenderPipeline';
 import { getCompositeDimensions } from '../engine/renderer';
 import { computeLayerPlacement } from '../engine/compositor';
 import { composePlacementConfig, computeCornerScale } from '../engine/compose';
-import { GUIDE_URL } from '../config/links';
+import { GUIDES_URL } from '../config/links';
 
 interface PreviewPaneProps {
   layers: Layer[];
@@ -515,8 +515,8 @@ export function PreviewPane({
             Add layers to get started,
             <br />
             or{' '}
-            <a href={GUIDE_URL} target="_blank" rel="noopener noreferrer">
-              read the guide
+            <a href={GUIDES_URL} target="_blank" rel="noopener noreferrer">
+              read the guides
             </a>
             .
           </p>

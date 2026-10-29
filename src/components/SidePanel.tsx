@@ -2,7 +2,7 @@ import { Layer, RisoConfig } from '../types';
 import { LayerActions } from '../hooks/useLayerState';
 import { LayerList } from './LayerList';
 import { ConfigPanel } from './ConfigPanel';
-import { GUIDE_URL } from '../config/links';
+import { SETTINGS_GUIDE_URL } from '../config/links';
 
 interface SidePanelProps {
   layers: Layer[];
@@ -28,15 +28,15 @@ export function SidePanel({
       <details className="pane pane--setup" open>
         <summary className="pane-summary">
           Setup
-          {/* A link is interactive content, so clicking it opens the guide
-              without toggling the pane. */}
+          {/* A link is interactive content, so clicking it opens the settings
+              guide without toggling the pane. */}
           <a
             className="pane-help"
-            href={GUIDE_URL}
+            href={SETTINGS_GUIDE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            title="Help"
-            aria-label="Help"
+            title="About the settings"
+            aria-label="About the settings"
           >
             [?]
           </a>

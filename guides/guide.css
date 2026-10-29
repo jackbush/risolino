@@ -1,0 +1,326 @@
+:root {
+  --paper: #fffdf5;
+  --tint: #f2ecd9;
+  --panel: #ffffff;
+  --ink: #111111;
+  --ink-soft: #555555;
+  --rule: #333333;
+  --border-radius: 4px;
+  --gutter: 1rem;
+  --edge: 0.65rem;
+  --font-body: 'Source Code Pro', monospace;
+  --font-heading: 'Michroma', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Headings take focus on page change for screen readers; no ring for that. */
+h1:focus {
+  outline: none;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--ink-soft);
+}
+
+/* Sidebar + reading column, like the app's preview + side panel. */
+.layout {
+  display: grid;
+  grid-template-columns: 17rem minmax(0, 1fr);
+  gap: var(--edge);
+  padding: var(--edge);
+  min-height: 100vh;
+}
+
+.side {
+  position: sticky;
+  top: var(--edge);
+  align-self: start;
+  height: calc(100vh - 2 * var(--edge));
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0.75rem 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--border-radius);
+  overflow-y: auto;
+}
+
+.side-back {
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.side-back:hover {
+  color: var(--ink);
+}
+
+.side-heading {
+  margin: 0.35rem 0 1rem;
+  padding: 0 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.side-group {
+  margin: 1rem 0 0.35rem;
+  padding: 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.side ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side li + li {
+  margin-top: 0.15rem;
+}
+
+.side li a {
+  display: block;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.side li a span {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.side li a:hover {
+  color: inherit;
+  background: var(--tint);
+}
+
+.side li a[aria-current='page'] {
+  background: var(--ink);
+  color: var(--panel);
+}
+
+.side li a[aria-current='page'] span {
+  color: #cfcfcf;
+}
+
+.guide {
+  padding: 2.5rem clamp(1rem, 5vw, 4rem) 5rem;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+h1,
+h2 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0 0 1rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+  margin: 3.5rem 0 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.step {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.lead {
+  font-size: 1.05rem;
+  margin: 0 0 2rem;
+}
+
+p,
+ul {
+  margin: 0 0 1rem;
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+
+li + li {
+  margin-top: 0.4rem;
+}
+
+.plate {
+  margin: 1.5rem 0;
+}
+
+.plate img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--border-radius);
+}
+
+figcaption {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 0.5rem;
+}
+
+.pair,
+.grid,
+.trio {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gutter);
+  align-items: start;
+}
+
+.trio {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* The photo is a hair squarer than the prints; trim it so the row lines up. */
+.trio img {
+  aspect-ratio: 755 / 1000;
+  object-fit: cover;
+}
+
+.pair .plate,
+.grid .plate,
+.trio .plate {
+  margin: 0.5rem 0;
+}
+
+.try {
+  margin-top: 3.5rem;
+  padding: 0 1.25rem 0.25rem;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--border-radius);
+}
+
+.try h2 {
+  margin-top: 1.25rem;
+}
+
+/* Settings reference: name on the left, explanation on the right. */
+.setting {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: var(--gutter);
+  padding: 1.25rem 0 0.25rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* An intro paragraph before the list needs the same room the lead gets. */
+p + .setting {
+  margin-top: 2rem;
+}
+
+/* A group of settings under its own heading, e.g. Advanced layer options. */
+.setting-group {
+  margin-top: 3.5rem;
+}
+
+.setting-group > h2 {
+  margin: 0 0 0.75rem;
+}
+
+.setting h2,
+.setting h3 {
+  display: block;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.start span {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-right: 0.35rem;
+}
+
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    position: static;
+    height: auto;
+  }
+
+  .guide {
+    padding: 1.5rem var(--gutter) 4rem;
+  }
+
+  .setting {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
+/* The variants stay 2×2 on a phone: they're for comparing, not detail. */
+@media (max-width: 560px) {
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}
