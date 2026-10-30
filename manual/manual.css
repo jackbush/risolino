@@ -318,9 +318,9 @@ p + .setting {
   }
 }
 
-/* The variants stay 2×2 on a phone: they're for comparing, not detail. */
+/* The variants and side-by-side pairs stay in columns on a phone: they're for comparing, not detail. */
 @media (max-width: 560px) {
-  .pair {
+  .pair:not(.side-by-side) {
     grid-template-columns: 1fr;
   }
 }
