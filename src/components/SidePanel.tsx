@@ -147,7 +147,7 @@ export function SidePanel({
         </summary>
         <div className="pane-body">
           {isEmpty ? (
-            <p className="pane-note">Add layers first, then set up your print.</p>
+            <p className="pane-note">Add a layer to set up your print.</p>
           ) : (
             <ConfigPanel config={config} onChange={onConfigChange} />
           )}

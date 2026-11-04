@@ -1125,8 +1125,8 @@ button:disabled {
 }
 
 /* The prompt is a card pinned to the foot of the screen while it's empty,
-   the print showing behind and around it; the preview half after. Its copy
-   and the drop overlay's alike. */
+   the print showing behind and around it. With artwork in, only the drop
+   overlay's copy shows, at the foot of the preview half. */
 .app--mobile .drop-prompt {
   justify-content: flex-end;
   padding: 0 var(--pad-right) var(--pad-bottom) var(--pad-left);

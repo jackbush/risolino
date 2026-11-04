@@ -77,6 +77,44 @@ a:hover {
   overflow-y: auto;
 }
 
+/* The eyebrow and title, with the contents button beside them on a phone. */
+.side-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.side-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.side-toggle {
+  display: none;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--border-radius);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.side-toggle:hover {
+  background: var(--tint);
+}
+
+.side-toggle[aria-expanded='true'] {
+  background: var(--ink);
+  color: var(--panel);
+}
+
 .side-back {
   padding: 0 0.5rem;
   font-size: 0.8rem;
@@ -306,6 +344,20 @@ p + .setting {
   .side {
     position: static;
     height: auto;
+    padding: 0.75rem;
+  }
+
+  .side-heading {
+    margin-bottom: 0;
+  }
+
+  /* The contents fold away behind the button (manual.ts toggles it). */
+  .side-toggle {
+    display: inline-flex;
+  }
+
+  .side:not(.side--open) .side-contents {
+    display: none;
   }
 
   .manual {

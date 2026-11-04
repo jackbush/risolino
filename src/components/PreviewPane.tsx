@@ -529,7 +529,9 @@ export function PreviewPane({
         </div>
       )}
       <div className="preview-stage" ref={containerRef}>
-        {!canvasReady && <DropPrompt dropping={false} onChooseFiles={mobile ? onAddFiles : undefined} />}
+        {/* Gone the moment there's artwork, not when it first renders, so it
+            never overlaps the panel that replaces it. */}
+        {isEmpty && <DropPrompt dropping={false} onChooseFiles={mobile ? onAddFiles : undefined} />}
         <canvas
           className={`preview-canvas${zoomMode === 'full' ? ' preview-canvas--full' : ''}${
             composeMode ? ' preview-canvas--compose' : ''

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { IMPORT_ACCEPT } from '../engine/importFiles';
+import { BACKGROUNDS } from '../config/backgrounds';
 
 interface DropPromptProps {
   /** Something is being dragged over the window right now. */
@@ -28,7 +29,8 @@ export function DropPrompt({ dropping, onChooseFiles }: DropPromptProps) {
         </h1>
         {onChooseFiles && (
           <>
-            <p className="drop-prompt-body">Snap a drawing, or pick one from your files.</p>
+            {/* The gallery behind (EmptyBackground) swipes, given more than one. */}
+            {BACKGROUNDS.length > 1 && <p className="drop-prompt-body">Swipe left or right for example prints.</p>}
             <input
               ref={inputRef}
               type="file"
