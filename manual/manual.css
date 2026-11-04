@@ -341,10 +341,16 @@ p + .setting {
     grid-template-columns: 1fr;
   }
 
+  /* The title bar stays put and the page scrolls behind it. Its shadow is a
+     solid block of paper filling the gap above it, so text passing under
+     the bar doesn't show again above it. Opened, the contents scroll
+     inside it. */
   .side {
-    position: static;
+    z-index: 1;
     height: auto;
+    max-height: calc(100dvh - 2 * var(--edge));
     padding: 0.75rem;
+    box-shadow: 0 calc(-1 * var(--edge)) 0 var(--edge) var(--paper);
   }
 
   .side-heading {
