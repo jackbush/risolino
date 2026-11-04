@@ -101,12 +101,18 @@ export function LayerTile({
   }, [showPicker]);
 
   // The picker opens at the click, but the sidebar sits against the window's
-  // right edge: once it has a size, slide it left until it fits.
+  // right edge: once it has a size, slide it left until it fits. A short
+  // screen can't always fit it above or below the click either, so keep it
+  // inside the window vertically too.
   useLayoutEffect(() => {
     const el = pickerRef.current;
     if (!el || !pickerPos) return;
-    const overflow = el.getBoundingClientRect().right - (window.innerWidth - PICKER_EDGE_GAP);
+    const rect = el.getBoundingClientRect();
+    const overflow = rect.right - (window.innerWidth - PICKER_EDGE_GAP);
     el.style.left = `${pickerPos.left - Math.max(0, overflow)}px`;
+    const maxTop = window.innerHeight - PICKER_EDGE_GAP - rect.height;
+    el.style.top = `${Math.max(PICKER_EDGE_GAP, Math.min(rect.top, maxTop))}px`;
+    el.style.bottom = 'auto';
   }, [pickerPos]);
 
   function commitName() {

@@ -17,12 +17,12 @@ import { Layer, InkColor } from '../types';
 import { LayerActions, MAX_LAYERS } from '../hooks/useLayerState';
 import { LayerTile } from './LayerTile';
 import { ManualLink } from './ManualLink';
-import { loadImageFile, isHeicFile } from '../engine/imageLoader';
-import { loadPdfFile } from '../engine/pdfLoader';
+import { IMPORT_ACCEPT } from '../engine/importFiles';
 
 interface LayerListProps {
   layers: Layer[];
   actions: LayerActions;
+  onAddFiles: (files: FileList) => void;
   advancedEnabled: boolean;
   onAdvancedChange: (enabled: boolean) => void;
   paperColor?: string;
@@ -34,6 +34,7 @@ interface LayerListProps {
 export function LayerList({
   layers,
   actions,
+  onAddFiles,
   advancedEnabled,
   onAdvancedChange,
   paperColor,
@@ -56,22 +57,7 @@ export function LayerList({
   }
 
   function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-    if (!files) return;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.type === 'application/pdf') {
-        loadPdfFile(file, layers.length, MAX_LAYERS).then(
-          (pages) => pages.forEach((p) => actions.addLayerWithImage(p.grayscaleData)),
-          (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
-        );
-      } else if (file.type.startsWith('image/') || isHeicFile(file)) {
-        loadImageFile(file).then(
-          (result) => actions.addLayerWithImage(result.grayscaleData),
-          (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
-        );
-      }
-    }
+    if (e.target.files) onAddFiles(e.target.files);
     e.target.value = '';
   }
 
@@ -111,7 +97,7 @@ export function LayerList({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*,.heic,.heif,application/pdf"
+        accept={IMPORT_ACCEPT}
         multiple
         style={{ display: 'none' }}
         onChange={handleFilesSelected}

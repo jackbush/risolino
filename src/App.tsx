@@ -3,8 +3,8 @@ import { PreviewPane } from './components/PreviewPane';
 import { SidePanel } from './components/SidePanel';
 import { useLayerState, MAX_LAYERS } from './hooks/useLayerState';
 import { exportFullRes } from './engine/renderer';
-import { loadImageFile, isHeicFile } from './engine/imageLoader';
-import { loadPdfFile } from './engine/pdfLoader';
+import { importFiles } from './engine/importFiles';
+import { useMediaQuery, MOBILE_LAYOUT_QUERY } from './hooks/useMediaQuery';
 import { RisoConfig } from './types';
 import { ZoomMode } from './hooks/useRenderPipeline';
 import './index.css';
@@ -17,6 +17,7 @@ export function App() {
   const [zoomMode, setZoomMode] = useState<ZoomMode>('fit');
   const [composeMode, setComposeMode] = useState(false);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const mobile = useMediaQuery(MOBILE_LAYOUT_QUERY);
 
   const [config, setConfig] = useState<RisoConfig>({
     advancedLayerOptionsEnabled: false,
@@ -57,32 +58,25 @@ export function App() {
     setSelectedLayerId(null);
   }
 
+  const isEmpty = !layers.some((l) => l.grayscaleData);
+
   const selectedLayer = composeMode
     ? layers.find((l) => l.id === selectedLayerId) ?? null
     : null;
+
+  const addFiles = useCallback(
+    (files: FileList) =>
+      importFiles(files, layersRef.current.length, MAX_LAYERS, actions.addLayerWithImage),
+    [actions],
+  );
 
   const handleDrop = useCallback(
     (e: DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
-      const files = e.dataTransfer?.files;
-      if (!files) return;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.type === 'application/pdf') {
-          loadPdfFile(file, layersRef.current.length, MAX_LAYERS).then(
-            (pages) => pages.forEach((p) => actions.addLayerWithImage(p.grayscaleData)),
-            (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
-          );
-        } else if (file.type.startsWith('image/') || isHeicFile(file)) {
-          loadImageFile(file).then(
-            (result) => actions.addLayerWithImage(result.grayscaleData),
-            (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
-          );
-        }
-      }
+      if (e.dataTransfer?.files) addFiles(e.dataTransfer.files);
     },
-    [actions],
+    [addFiles],
   );
 
   useEffect(() => {
@@ -124,7 +118,11 @@ export function App() {
   }, [handleDrop]);
 
   return (
-    <div className={`app${zoomMode === 'full' ? ' app--zoom-full' : ''}`}>
+    <div
+      className={`app${mobile ? ' app--mobile' : ''}${isEmpty ? ' app--empty' : ''}${
+        zoomMode === 'full' ? ' app--zoom-full' : ''
+      }`}
+    >
       {isDragOver && (
         <div className="drop-overlay">
           <DropPrompt dropping />
@@ -133,6 +131,9 @@ export function App() {
       <PreviewPane
         layers={layers}
         config={config}
+        isEmpty={isEmpty}
+        mobile={mobile}
+        onAddFiles={addFiles}
         zoomMode={zoomMode}
         onZoomModeChange={(m) => {
           if (!composeMode) setZoomMode(m);
@@ -149,15 +150,21 @@ export function App() {
         onLayerOffsetChange={actions.updateLayerOffset}
         onLayerScaleChange={actions.updateLayerScale}
       />
-      <SidePanel
-        layers={layers}
-        actions={actions}
-        config={config}
-        onConfigChange={handleConfigChange}
-        composeMode={composeMode}
-        selectedLayerId={selectedLayerId}
-        onSelectLayer={setSelectedLayerId}
-      />
+      {/* On a phone there's nothing to set until there's artwork, so the
+          preview gets the whole screen to ask for some. */}
+      {!(mobile && isEmpty) && (
+        <SidePanel
+          layers={layers}
+          actions={actions}
+          config={config}
+          onConfigChange={handleConfigChange}
+          onAddFiles={addFiles}
+          mobile={mobile}
+          composeMode={composeMode}
+          selectedLayerId={selectedLayerId}
+          onSelectLayer={setSelectedLayerId}
+        />
+      )}
     </div>
   );
 }

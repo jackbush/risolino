@@ -15,6 +15,7 @@
   --spacing-sm: 0.35rem;
   --spacing-md: 0.65rem;
   --border-radius: 4px;
+  --swatch-size: 28px;
   --font-family: 'Source Code Pro', monospace;
 }
 
@@ -69,6 +70,16 @@ body {
 
 .preview-pane {
   display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The area the sheet is fitted to (useRenderPipeline measures this box). */
+.preview-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
   overflow: auto;
@@ -98,14 +109,15 @@ body {
   cursor: grabbing;
 }
 
-/* 100% zoom layout: preview takes the whole window, controls float on top */
-.app--zoom-full {
+/* 100% zoom layout: preview takes the whole window, controls float on top.
+   The stacked layout keeps its split instead. */
+.app--zoom-full:not(.app--mobile) {
   grid-template-columns: 1fr;
   padding: 0;
   gap: 0;
 }
 
-.app--zoom-full .side-panel {
+.app--zoom-full:not(.app--mobile) .side-panel {
   position: fixed;
   top: var(--spacing-md);
   right: var(--spacing-md);
@@ -709,12 +721,12 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  width: calc(7 * 28px + 6 * 4px);
+  width: calc(7 * var(--swatch-size) + 6 * 4px);
 }
 
 .color-picker-swatch {
-  width: 28px;
-  height: 28px;
+  width: var(--swatch-size);
+  height: var(--swatch-size);
   padding: 0;
   border-radius: 3px;
   border: none;
@@ -738,6 +750,8 @@ button:disabled {
 /* Layer tile extras */
 .layer-drag-handle {
   cursor: grab;
+  /* A touch on the handle drags the layer rather than scrolling the list. */
+  touch-action: none;
   color: var(--color-soft);
   font-size: 1rem;
   flex-shrink: 0;
@@ -858,6 +872,8 @@ button:disabled {
   text-align: right;
 }
 
+
+
 /* While dragging, the overlay's copy of the prompt replaces the empty one. */
 .app:has(.drop-overlay) .drop-prompt:not(.drop-prompt--dropping) {
   visibility: hidden;
@@ -913,4 +929,258 @@ button:disabled {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ─── Stacked layout ──────────────────────────────────────────────────────
+   Phones and portrait tablets (the app--mobile class; its media query lives
+   in useMediaQuery.ts). Preview on top, Manual above it and the print
+   buttons beneath, one tabbed pane of controls below. Everything is sized
+   for fingers. */
+
+.app--mobile {
+  --swatch-size: 36px;
+  height: 100dvh;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  padding:
+    max(var(--spacing-md), env(safe-area-inset-top))
+    max(var(--spacing-md), env(safe-area-inset-right))
+    max(var(--spacing-md), env(safe-area-inset-bottom))
+    max(var(--spacing-md), env(safe-area-inset-left));
+}
+
+/* Nothing to set before there's artwork: the panel is gone (App.tsx) and
+   the preview takes the whole screen. */
+.app--mobile.app--empty {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* The bars stay put above the sheet and the zoom-transition overlay (z 15). */
+.preview-bar,
+.app--mobile .floating-controls {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.preview-bar {
+  justify-content: flex-end;
+  padding-bottom: var(--spacing-md);
+}
+
+.app--mobile .floating-controls {
+  left: auto;
+  bottom: auto;
+  padding-top: var(--spacing-md);
+}
+
+/* Bars at the top and foot of the preview half, even once the stage has
+   left the flow at 100%. */
+.app--mobile .preview-pane {
+  justify-content: space-between;
+}
+
+/* 100%: the sheet slides under everything, edge to edge. The stage bleeds
+   past the screen so that its centre (the point zooming pivots on and
+   panning is clamped to) stays the middle of the preview half, ~25dvh. */
+.app--mobile.app--zoom-full .preview-stage {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: -50dvh;
+  height: 150dvh;
+}
+
+.app--mobile .zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 40px;
+  padding: 0 0.5rem;
+}
+
+/* The manual is a link, not an action: paper-white. */
+.manual-btn {
+  background: #ffffff;
+  color: var(--color-fg);
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-float);
+}
+
+.manual-btn:hover {
+  background: var(--color-tint);
+}
+
+/* The prompt fills the screen while it's empty, the preview half after,
+   its copy and the drop overlay's alike. */
+.app--mobile .drop-prompt {
+  right: 0;
+  gap: 1.25rem;
+  padding: 0 1.5rem;
+}
+
+.app--mobile:not(.app--empty) .drop-prompt {
+  bottom: 50%;
+}
+
+.app--mobile .drop-prompt-title {
+  font-size: clamp(1.9rem, 9.5vw, 3.6rem);
+}
+
+.app--mobile .drop-prompt-body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.drop-prompt-action {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 1.2rem;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-float);
+  pointer-events: auto;
+}
+
+.pane--tabbed {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pane-tabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 1.4rem;
+  padding: 0 var(--spacing-md);
+}
+
+/* Set like the desktop pane titles; the open one is inked and underlined
+   where it meets its panel. */
+.pane-tab,
+.pane-tab:hover,
+.pane-tab:active {
+  padding: 0.7rem 0 0.6rem;
+  background: none;
+  border-radius: 0;
+  color: var(--color-soft);
+  font-family: 'Michroma', sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.pane-tab:hover {
+  color: var(--color-fg);
+}
+
+.pane-tab[aria-selected='true'] {
+  color: var(--color-fg);
+  box-shadow: inset 0 -3px 0 var(--color-fg);
+  cursor: default;
+}
+
+.pane--tabbed > .pane-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Layers: advanced options and the add button sit at the foot of the pane,
+   and only the tiles between scroll (their top spacing lives in the
+   scroller, see .layer-list-items). */
+.pane--tab-layers > .pane-body {
+  overflow: hidden;
+  padding-top: 0;
+}
+
+.app--mobile .layer-list,
+.app--mobile .layer-list-items {
+  flex: 1 1 auto;
+}
+
+.app--mobile .layer-list-items {
+  overscroll-behavior: contain;
+}
+
+.app--mobile .layer-list-add-btn {
+  min-height: 40px;
+}
+
+.app--mobile .config-item--row {
+  min-height: 40px;
+}
+
+/* 16px stops iOS zooming the page when a field takes focus. */
+.app--mobile input[type='text'],
+.app--mobile input[type='number'],
+.app--mobile select,
+.app--mobile .layer-tile-name-input {
+  font-size: 16px;
+  min-height: 34px;
+}
+
+.app--mobile input.layer-tile-field-input {
+  width: 56px;
+  min-height: 30px;
+}
+
+/* Tile sliders share the row with their label rather than a fixed width. */
+.app--mobile input.layer-tile-opacity-slider {
+  flex: 1;
+  min-width: 0;
+  max-width: 140px;
+  margin-left: var(--spacing-md);
+}
+
+.app--mobile input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+}
+
+.app--mobile input[type='checkbox']:checked::before {
+  width: 12px;
+  height: 12px;
+}
+
+.app--mobile input[type='range'] {
+  width: 140px;
+  height: 32px;
+}
+
+.app--mobile input[type='range']::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -9px;
+}
+
+.app--mobile input[type='range']::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+}
+
+.app--mobile .layer-drag-handle,
+.app--mobile .layer-select-radio {
+  width: 1.9rem;
+  padding: 0.6rem 0;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.app--mobile .config-inline-input {
+  width: 96px;
+}
+
+/* Square with the hex field beside it. */
+.app--mobile .paper-color-swatch {
+  width: 34px;
+  height: 34px;
+}
+
+.app--mobile .layer-remove-btn {
+  min-height: 40px;
 }

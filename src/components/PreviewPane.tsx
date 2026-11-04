@@ -5,10 +5,17 @@ import { getCompositeDimensions } from '../engine/renderer';
 import { computeLayerPlacement } from '../engine/compositor';
 import { composePlacementConfig, computeCornerScale } from '../engine/compose';
 import { DropPrompt } from './DropPrompt';
+import { NewTabArrow } from './ManualLink';
+import { manualUrl } from '../config/links';
 
 interface PreviewPaneProps {
   layers: Layer[];
   config: RisoConfig;
+  /** No layer has artwork yet. */
+  isEmpty: boolean;
+  /** Stacked layout: the buttons sit in bars above and below the preview, Manual among them. */
+  mobile: boolean;
+  onAddFiles: (files: FileList) => void;
   zoomMode: ZoomMode;
   onZoomModeChange: (mode: ZoomMode) => void;
   onExport: () => void;
@@ -28,8 +35,9 @@ const DRAG_THRESHOLD = 4;
 const TRANSITION_MS = 250;
 
 // A pointerdown within this many CSS px of a corner grabs it for scaling
-// (otherwise a press inside the box moves the layer).
-const CORNER_HIT_PX = 14;
+// (otherwise a press inside the box moves the layer). A fingertip is far
+// less precise than a mouse, so touch gets a wider reach.
+const cornerHitPx = (e: React.PointerEvent) => (e.pointerType === 'touch' ? 24 : 14);
 
 const clampOffset = (v: number) => Math.min(10000, Math.max(-10000, v));
 
@@ -75,6 +83,9 @@ interface PendingTransition {
 export function PreviewPane({
   layers,
   config,
+  isEmpty,
+  mobile,
+  onAddFiles,
   zoomMode,
   onZoomModeChange,
   onExport,
@@ -95,7 +106,6 @@ export function PreviewPane({
   const transitionRef = useRef<PendingTransition | null>(null);
   const [canvasReady, setCanvasReady] = useState(false);
 
-  const isEmpty = !layers.some((l) => l.grayscaleData);
   const { width: compositeW, height: compositeH } = getCompositeDimensions(
     layers,
     config.paperSize,
@@ -317,7 +327,7 @@ export function PreviewPane({
     if (!ctx) return;
     const px = (e.clientX - ctx.rectLeft) / ctx.displayScale;
     const py = (e.clientY - ctx.rectTop) / ctx.displayScale;
-    const hit = CORNER_HIT_PX / ctx.displayScale;
+    const hit = cornerHitPx(e) / ctx.displayScale;
 
     // A handle on the currently-selected layer wins, even where boxes overlap.
     if (selectedLayer?.grayscaleData) {
@@ -434,7 +444,7 @@ export function PreviewPane({
     if (!canvas || !ctx) return;
     const px = (e.clientX - ctx.rectLeft) / ctx.displayScale;
     const py = (e.clientY - ctx.rectTop) / ctx.displayScale;
-    const hit = CORNER_HIT_PX / ctx.displayScale;
+    const hit = cornerHitPx(e) / ctx.displayScale;
 
     let cursor = 'default';
     if (selectedLayer?.grayscaleData) {
@@ -508,20 +518,29 @@ export function PreviewPane({
   }
 
   return (
-    <div className="preview-pane" ref={containerRef}>
-      {!canvasReady && (
-        <DropPrompt dropping={false} />
+    <div className="preview-pane">
+      {mobile && (
+        <div className="preview-bar">
+          <a className="zoom-btn manual-btn" href={manualUrl('page')} target="_blank" rel="noopener noreferrer">
+            Manual
+            <NewTabArrow size={14} />
+            <span className="visually-hidden">(opens in a new tab)</span>
+          </a>
+        </div>
       )}
-      <canvas
-        className={`preview-canvas${zoomMode === 'full' ? ' preview-canvas--full' : ''}${
-          composeMode ? ' preview-canvas--compose' : ''
-        }`}
-        ref={canvasRef}
-        style={{ display: canvasReady ? 'block' : 'none', touchAction: 'none' }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-      />
+      <div className="preview-stage" ref={containerRef}>
+        {!canvasReady && <DropPrompt dropping={false} onChooseFiles={mobile ? onAddFiles : undefined} />}
+        <canvas
+          className={`preview-canvas${zoomMode === 'full' ? ' preview-canvas--full' : ''}${
+            composeMode ? ' preview-canvas--compose' : ''
+          }`}
+          ref={canvasRef}
+          style={{ display: canvasReady ? 'block' : 'none', touchAction: 'none' }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        />
+      </div>
       {canvasReady && (
         <div className="floating-controls">
           {composeMode ? (
@@ -546,8 +565,9 @@ export function PreviewPane({
                   100%
                 </button>
               </div>
+              {/* A phone's bar has no room for the pixel size. */}
               <button type="button" className="zoom-btn download-btn" onClick={onExport}>
-                Download ({exportW}×{exportH}px)
+                {mobile ? 'Download' : `Download (${exportW}×${exportH}px)`}
               </button>
               <button type="button" className="zoom-btn compose-btn" onClick={onCompose}>
                 Compose

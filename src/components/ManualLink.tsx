@@ -25,3 +25,12 @@ export function ManualLink({ page, topic }: ManualLinkProps) {
     </a>
   );
 }
+
+/** The ↗ that marks a link to the whole manual, which opens in a new tab. */
+export function NewTabArrow({ className, size }: { className?: string; size: number }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" width={size} height={size} aria-hidden="true">
+      <path d="M7 4.5h8.5V13M15.5 4.5 4.5 15.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
+    </svg>
+  );
+}

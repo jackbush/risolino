@@ -17,6 +17,8 @@ New to it? The [manual](https://jackbush.github.io/risolino/manual/) walks throu
 
 Layers turn grayscale on import: dark areas become heavy ink, light areas become bare paper. It's how a real riso sees your artwork, one colour separation at a time. Drag the handle to reorder layers (they print bottom to top), click the name to rename, click the thumbnail to swap the image.
 
+**On a phone** (or any narrow or portrait screen) the preview sits on top and the controls underneath, with **Layers** and **Setup** as tabs. No dragging files in, so tap **Choose files** — snap a drawing with the camera, or pick from your photos. At 100% the print fills the whole screen behind the controls. Compose works by finger too.
+
 **Advanced layer options**, at the foot of the Layers panel once you have a layer, reveals per-layer opacity, scale, and X/Y offset boxes on each layer, maybe too much control. (Compose mode sets scale and offset for you by dragging — see below — so you don't have to poke numbers unless you want to.)
 
 ### The setup
