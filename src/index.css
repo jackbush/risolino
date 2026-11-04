@@ -58,6 +58,17 @@ body {
   position: relative;
 }
 
+/* Until the fonts (and, with nothing loaded, the print behind) are in, only
+   the print shows; then the rest fades in on top. See App.tsx. */
+.app > :not(.empty-background) {
+  transition: opacity 300ms ease;
+}
+
+.app--loading > :not(.empty-background) {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Drag-and-drop state: darkens the table under the panels (z 20), so they
    stay readable on top. Its message is the empty state's DropPrompt. */
 .drop-overlay {
@@ -66,6 +77,32 @@ body {
   z-index: 12;
   background: rgba(17, 17, 17, 0.6);
   pointer-events: none;
+}
+
+/* With nothing loaded the print in negative says it instead (EmptyBackground). */
+.app--empty .drop-overlay {
+  background: none;
+}
+
+/* The empty state's gallery, behind everything; EmptyBackground sizes and
+   places the print. */
+.empty-background {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  /* Horizontal swipes step the gallery rather than navigating. */
+  touch-action: none;
+}
+
+.empty-background-print {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.empty-background--inverted {
+  filter: invert(1);
 }
 
 .preview-pane {
@@ -479,6 +516,14 @@ details.pane:not([open]) .pane-chevron,
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
   border-top: 1px solid #333333;
+}
+
+/* Stands in for a pane's controls when there's nothing for them to act on. */
+.pane-note {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-soft);
 }
 
 /* Setup pane keeps its natural size always — it never gives up space to
@@ -899,22 +944,30 @@ button:disabled {
   visibility: hidden;
 }
 
-/* Big type set straight on the table, in the preview area (the window
-   minus the sidebar) whatever the scroll. Shared by the empty state and
-   the drop overlay, which differ only in colour. */
+/* Big type set straight on the table whatever the scroll, its two lines
+   kept whole even where they run behind the sidebar. Shared by the empty
+   state and the drop overlay, which differ only in colour. Its baseline
+   sits twice as far from the foot of the window as the type is from the
+   left edge. */
 .drop-prompt {
+  --prompt-inset: clamp(1.5rem, 6vw, 6rem);
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  right: calc(var(--sidebar-width) + var(--spacing-md));
+  right: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 2rem;
-  padding: 0 clamp(1.5rem, 6vw, 6rem);
+  justify-content: flex-end;
+  padding: 0 var(--prompt-inset) calc(2 * var(--prompt-inset));
   color: #111111;
   pointer-events: none;
+}
+
+.drop-prompt-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .drop-prompt--dropping {
@@ -925,9 +978,18 @@ button:disabled {
   margin: 0;
   font-family: 'Michroma', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.5rem, 6.2vw, 6rem);
+  /* Full size, shrinking only once its longer line ("Drop in images",
+     8.8em) would run off the window. */
+  font-size: min(6rem, (100vw - 2 * var(--prompt-inset)) / 8.9);
   line-height: 1.02;
   letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+/* Drop the line box's tail below the baseline (0.068em in Michroma), so
+   the baseline, not the box, lands on the inset. */
+.app:not(.app--mobile) .drop-prompt-title {
+  margin-bottom: -0.068em;
 }
 
 .drop-prompt-body {
@@ -962,11 +1024,11 @@ button:disabled {
   --pad-top: max(var(--spacing-md), env(safe-area-inset-top));
   --pad-right: max(var(--spacing-md), env(safe-area-inset-right));
   --pad-left: max(var(--spacing-md), env(safe-area-inset-left));
+  --pad-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
   height: 100dvh;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  padding: var(--pad-top) var(--pad-right) max(var(--spacing-md), env(safe-area-inset-bottom))
-    var(--pad-left);
+  padding: var(--pad-top) var(--pad-right) var(--pad-bottom) var(--pad-left);
 }
 
 /* Controls folded down to their tabs: the preview takes the rest. */
@@ -980,7 +1042,9 @@ button:disabled {
   grid-template-rows: minmax(0, 1fr);
 }
 
-/* The bars stay put above the sheet and the zoom-transition overlay (z 15). */
+/* The bars stay put above the sheet and the zoom-transition overlay (z 15).
+   Only their buttons take touches: the rest of each bar lets the sheet
+   behind be panned at 100%, and the gallery swiped while it's empty. */
 .preview-bar,
 .app--mobile .floating-controls {
   position: relative;
@@ -988,6 +1052,18 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  pointer-events: none;
+}
+
+.preview-bar > *,
+.app--mobile .floating-controls > * {
+  pointer-events: auto;
+}
+
+/* Nothing in the empty preview to touch but its buttons: let swipes through
+   to the gallery behind. */
+.app--mobile.app--empty .preview-pane {
+  pointer-events: none;
 }
 
 .preview-bar {
@@ -1043,20 +1119,30 @@ button:disabled {
   background: var(--color-tint);
 }
 
-/* The prompt fills the screen while it's empty, the preview half after,
-   its copy and the drop overlay's alike. */
+/* The prompt is a card pinned to the foot of the screen while it's empty,
+   the print showing behind and around it; the preview half after. Its copy
+   and the drop overlay's alike. */
 .app--mobile .drop-prompt {
-  right: 0;
-  gap: 1.25rem;
-  padding: 0 1.5rem;
+  justify-content: flex-end;
+  padding: 0 var(--pad-right) var(--pad-bottom) var(--pad-left);
 }
 
 .app--mobile:not(.app--empty) .drop-prompt {
   bottom: 50%;
 }
 
+.app--mobile .drop-prompt-content {
+  gap: 1rem;
+  padding: 1.1rem var(--spacing-md) var(--spacing-md);
+  background: #ffffff;
+  border: 1px solid #333333;
+  border-radius: var(--border-radius);
+  color: var(--color-fg);
+}
+
 .app--mobile .drop-prompt-title {
-  font-size: clamp(1.9rem, 9.5vw, 3.6rem);
+  font-size: clamp(1.75rem, 8.5vw, 3.2rem);
+  white-space: normal;
 }
 
 .app--mobile .drop-prompt-body {
@@ -1065,11 +1151,8 @@ button:disabled {
 }
 
 .drop-prompt-action {
-  align-self: flex-start;
   min-height: 44px;
-  padding: 0 1.2rem;
   font-size: 0.95rem;
-  box-shadow: var(--shadow-float);
   pointer-events: auto;
 }
 

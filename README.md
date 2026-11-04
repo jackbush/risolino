@@ -50,6 +50,7 @@ Zoom is locked to *Fit* while you're composing. Hit **Exit compose mode** to get
 ## Working on it
 - React 19 + TypeScript + Vite, no state library.
 - Pushes to `main` deploy to GitHub Pages.
+- The empty state's gallery comes from the prints in `backgrounds/`. After adding, changing or removing one, run `npm run backgrounds`: it cuts a portrait and a landscape crop from the centre of each at 1:1 (so the dots show at 100%) into `src/assets/backgrounds/`, with the manifest the app reads. Commit both. Which print it opens on is `DEFAULT_BACKGROUND` in `src/config/backgrounds.ts` (`null` for a random one).
 - The manual is a second, static Vite page (`manual/index.html`, its images in `manual/img/`). Each of its pages is an `<article class="page">` whose id is its hash (`#graphic`, `#mushroom`, `#page`…); `manual/manual.ts` shows one at a time. Its downloadable demo files sit in `public/manual/` so they keep their names.
 ```
 npm install

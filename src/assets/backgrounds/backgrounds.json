@@ -1,0 +1,28 @@
+[
+  {
+    "name": "riso-print-2026-11-04-13-12-16",
+    "portrait": {
+      "file": "riso-print-2026-11-04-13-12-16-portrait.webp",
+      "width": 2048,
+      "height": 2796
+    },
+    "landscape": {
+      "file": "riso-print-2026-11-04-13-12-16-landscape.webp",
+      "width": 3024,
+      "height": 2268
+    }
+  },
+  {
+    "name": "riso-print-2026-11-04-13-15-02",
+    "portrait": {
+      "file": "riso-print-2026-11-04-13-15-02-portrait.webp",
+      "width": 2048,
+      "height": 2796
+    },
+    "landscape": {
+      "file": "riso-print-2026-11-04-13-15-02-landscape.webp",
+      "width": 3024,
+      "height": 2268
+    }
+  }
+]

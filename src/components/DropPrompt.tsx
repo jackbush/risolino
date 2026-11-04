@@ -19,33 +19,33 @@ export function DropPrompt({ dropping, onChooseFiles }: DropPromptProps) {
 
   return (
     <div className={`drop-prompt${dropping ? ' drop-prompt--dropping' : ''}`}>
-      <h1 className="drop-prompt-title">
-        {`${opener} images`}
-        <br />
-        or a PDF
-      </h1>
-      <p className="drop-prompt-body">
-        Each image or page becomes an ink layer.
-        {onChooseFiles && ' Snap a drawing, or pick one from your files.'}
-      </p>
-      {onChooseFiles && (
-        <>
-          <input
-            ref={inputRef}
-            type="file"
-            accept={IMPORT_ACCEPT}
-            multiple
-            hidden
-            onChange={(e) => {
-              if (e.target.files) onChooseFiles(e.target.files);
-              e.target.value = '';
-            }}
-          />
-          <button type="button" className="drop-prompt-action" onClick={() => inputRef.current?.click()}>
-            Choose files
-          </button>
-        </>
-      )}
+      {/* A card of its own on a phone; plain type on the table otherwise. */}
+      <div className="drop-prompt-content">
+        <h1 className="drop-prompt-title">
+          {`${opener} images`}
+          <br />
+          or a PDF
+        </h1>
+        {onChooseFiles && (
+          <>
+            <p className="drop-prompt-body">Snap a drawing, or pick one from your files.</p>
+            <input
+              ref={inputRef}
+              type="file"
+              accept={IMPORT_ACCEPT}
+              multiple
+              hidden
+              onChange={(e) => {
+                if (e.target.files) onChooseFiles(e.target.files);
+                e.target.value = '';
+              }}
+            />
+            <button type="button" className="drop-prompt-action" onClick={() => inputRef.current?.click()}>
+              Choose files
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

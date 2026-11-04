@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Layer, RisoConfig } from '../types';
 import { LayerActions } from '../hooks/useLayerState';
 import { LayerList } from './LayerList';
@@ -8,6 +8,8 @@ import { manualUrl } from '../config/links';
 
 interface SidePanelProps {
   layers: Layer[];
+  /** No layer has artwork yet. */
+  isEmpty: boolean;
   actions: LayerActions;
   config: RisoConfig;
   onConfigChange: (updates: Partial<RisoConfig>) => void;
@@ -28,6 +30,7 @@ type Tab = (typeof TABS)[number]['id'];
 
 export function SidePanel({
   layers,
+  isEmpty,
   actions,
   config,
   onConfigChange,
@@ -41,6 +44,11 @@ export function SidePanel({
   const [tab, setTab] = useState<Tab>('layers');
   // Folded down to its tabs, leaving the preview the screen.
   const [collapsed, setCollapsed] = useState(false);
+  // Desktop Setup stays folded until there's artwork to set up, and opens
+  // when the first layer lands (folding again if they all go). In between
+  // it's the user's to open and close.
+  const [setupOpen, setSetupOpen] = useState(!isEmpty);
+  useEffect(() => setSetupOpen(!isEmpty), [isEmpty]);
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
 
   const layerList = (
@@ -128,13 +136,21 @@ export function SidePanel({
         <span className="visually-hidden">(opens in a new tab)</span>
       </a>
 
-      <details className="pane pane--setup" open>
+      <details
+        className="pane pane--setup"
+        open={setupOpen}
+        onToggle={(e) => setSetupOpen(e.currentTarget.open)}
+      >
         <summary className="pane-summary">
           Setup
           <Chevron className="pane-chevron" />
         </summary>
         <div className="pane-body">
-          <ConfigPanel config={config} onChange={onConfigChange} />
+          {isEmpty ? (
+            <p className="pane-note">Add layers first, then set up your print.</p>
+          ) : (
+            <ConfigPanel config={config} onChange={onConfigChange} />
+          )}
         </div>
       </details>
 

@@ -9,6 +9,10 @@ import { RisoConfig } from './types';
 import { ZoomMode } from './hooks/useRenderPipeline';
 import './index.css';
 import { DropPrompt } from './components/DropPrompt';
+import { EmptyBackground } from './components/EmptyBackground';
+
+// The faces index.html loads, in every weight the UI sets text in.
+const UI_FONTS = ["1em 'Michroma'", "1em 'Source Code Pro'", "500 1em 'Source Code Pro'"];
 
 export function App() {
   const { layers, ...actions } = useLayerState();
@@ -18,6 +22,16 @@ export function App() {
   const [composeMode, setComposeMode] = useState(false);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const mobile = useMediaQuery(MOBILE_LAYOUT_QUERY);
+  // The UI stays hidden until its fonts are in (or have failed), so text
+  // never shows in a fallback face and then jumps; with nothing loaded it
+  // also waits for the print behind it, so that comes first.
+  const [fontsReady, setFontsReady] = useState(false);
+  const [backdropReady, setBackdropReady] = useState(false);
+  useEffect(() => {
+    Promise.all(UI_FONTS.map((f) => document.fonts.load(f)))
+      .catch(() => {})
+      .finally(() => setFontsReady(true));
+  }, []);
 
   const [config, setConfig] = useState<RisoConfig>({
     advancedLayerOptionsEnabled: false,
@@ -59,6 +73,7 @@ export function App() {
   }
 
   const isEmpty = !layers.some((l) => l.grayscaleData);
+  const uiReady = fontsReady && (backdropReady || !isEmpty);
 
   const selectedLayer = composeMode
     ? layers.find((l) => l.id === selectedLayerId) ?? null
@@ -121,8 +136,11 @@ export function App() {
     <div
       className={`app${mobile ? ' app--mobile' : ''}${isEmpty ? ' app--empty' : ''}${
         zoomMode === 'full' ? ' app--zoom-full' : ''
-      }`}
+      }${uiReady ? '' : ' app--loading'}`}
     >
+      {isEmpty && (
+        <EmptyBackground mobile={mobile} inverted={isDragOver} onReady={() => setBackdropReady(true)} />
+      )}
       {isDragOver && (
         <div className="drop-overlay">
           <DropPrompt dropping />
@@ -155,6 +173,7 @@ export function App() {
       {!(mobile && isEmpty) && (
         <SidePanel
           layers={layers}
+          isEmpty={isEmpty}
           actions={actions}
           config={config}
           onConfigChange={handleConfigChange}
