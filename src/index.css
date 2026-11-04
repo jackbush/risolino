@@ -7,6 +7,8 @@
   --color-tint: #f2ecd9;
   /* The table the sheet lies on: a warm mid-grey, so every paper colour reads. */
   --color-surface: #8b8984;
+  /* Behind the app, where Safari takes its toolbar tint from. */
+  --color-chrome: #000000;
   --sidebar-width: 360px;
   /* A sheet lifting off the table, and the lighter lift of the floating buttons. */
   --shadow-sheet: 0 1px 2px rgba(0, 0, 0, 0.18), 0 14px 36px -10px rgba(0, 0, 0, 0.45);
@@ -30,7 +32,7 @@ body {
   width: 100%;
   height: 100%;
   font-family: var(--font-family);
-  background-color: var(--color-surface);
+  background-color: var(--color-chrome);
   color: var(--color-fg);
 }
 
@@ -56,6 +58,7 @@ body {
   gap: var(--spacing-md);
   padding: var(--spacing-md);
   position: relative;
+  background-color: var(--color-surface);
 }
 
 /* Until the fonts (and, with nothing loaded, the print behind) are in, only
@@ -90,6 +93,8 @@ body {
   position: fixed;
   inset: 0;
   overflow: hidden;
+  /* Safari tints its bars from a fixed element at the screen's edge. */
+  background-color: var(--color-chrome);
   /* Horizontal swipes step the gallery rather than navigating. */
   touch-action: none;
 }
