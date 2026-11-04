@@ -83,9 +83,9 @@ export function LayerTile({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const g = layer.grayscaleData;
-    // Pre-halve before the big downscale, same as the preview compositor —
-    // a single drawImage skip-samples and moirés on halftone-ish imagery
-    const src = prefilterForScale(g, Math.min(PREVIEW_SIZE / g.width, PREVIEW_SIZE / g.height));
+    // Antialiased first, like the preview compositor: a single big drawImage
+    // skip-samples and moirés on halftone-ish imagery
+    const src = prefilterForScale(g, Math.min(PREVIEW_SIZE / g.width, PREVIEW_SIZE / g.height), true);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);

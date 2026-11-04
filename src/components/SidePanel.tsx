@@ -3,7 +3,7 @@ import { Layer, RisoConfig } from '../types';
 import { LayerActions } from '../hooks/useLayerState';
 import { LayerList } from './LayerList';
 import { ConfigPanel } from './ConfigPanel';
-import { NewTabArrow } from './ManualLink';
+import { Chevron, NewTabArrow } from './ManualLink';
 import { manualUrl } from '../config/links';
 
 interface SidePanelProps {
@@ -39,6 +39,8 @@ export function SidePanel({
 }: SidePanelProps) {
   // Layers first: with nothing loaded, adding artwork is the only next step.
   const [tab, setTab] = useState<Tab>('layers');
+  // Folded down to its tabs, leaving the preview the screen.
+  const [collapsed, setCollapsed] = useState(false);
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
 
   const layerList = (
@@ -68,34 +70,51 @@ export function SidePanel({
 
     return (
       <div className="side-panel">
-        <div className={`pane pane--tabbed pane--tab-${tab}`}>
-          <div className="pane-tabs" role="tablist" aria-label="Controls" onKeyDown={handleTabKeyDown}>
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                ref={(el) => {
-                  tabRefs.current[t.id] = el;
-                }}
-                type="button"
-                role="tab"
-                id={`tab-${t.id}`}
-                className="pane-tab"
-                aria-selected={tab === t.id}
-                aria-controls="tab-panel"
-                tabIndex={tab === t.id ? 0 : -1}
-                onClick={() => setTab(t.id)}
-              >
-                {t.label}
-              </button>
-            ))}
+        <div className={`pane pane--tabbed pane--tab-${tab}${collapsed ? ' pane--collapsed' : ''}`}>
+          <div className="pane-header">
+            <div className="pane-tabs" role="tablist" aria-label="Controls" onKeyDown={handleTabKeyDown}>
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  ref={(el) => {
+                    tabRefs.current[t.id] = el;
+                  }}
+                  type="button"
+                  role="tab"
+                  id={`tab-${t.id}`}
+                  className="pane-tab"
+                  aria-selected={tab === t.id}
+                  aria-controls="tab-panel"
+                  tabIndex={tab === t.id ? 0 : -1}
+                  onClick={() => {
+                    setTab(t.id);
+                    setCollapsed(false);
+                  }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="pane-collapse"
+              aria-expanded={!collapsed}
+              aria-controls="tab-panel"
+              aria-label={collapsed ? 'Show controls' : 'Hide controls'}
+              onClick={() => setCollapsed((c) => !c)}
+            >
+              <Chevron className="pane-chevron" />
+            </button>
           </div>
-          <div className="pane-body" role="tabpanel" id="tab-panel" aria-labelledby={`tab-${tab}`}>
-            {tab === 'layers' ? (
-              layerList
-            ) : (
-              <ConfigPanel config={config} onChange={onConfigChange} />
-            )}
-          </div>
+          {!collapsed && (
+            <div className="pane-body" role="tabpanel" id="tab-panel" aria-labelledby={`tab-${tab}`}>
+              {tab === 'layers' ? (
+                layerList
+              ) : (
+                <ConfigPanel config={config} onChange={onConfigChange} />
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -110,14 +129,20 @@ export function SidePanel({
       </a>
 
       <details className="pane pane--setup" open>
-        <summary className="pane-summary">Setup</summary>
+        <summary className="pane-summary">
+          Setup
+          <Chevron className="pane-chevron" />
+        </summary>
         <div className="pane-body">
           <ConfigPanel config={config} onChange={onConfigChange} />
         </div>
       </details>
 
       <details className="pane pane--layers" open>
-        <summary className="pane-summary">Layers</summary>
+        <summary className="pane-summary">
+          Layers
+          <Chevron className="pane-chevron" />
+        </summary>
         <div className="pane-body">{layerList}</div>
       </details>
     </div>

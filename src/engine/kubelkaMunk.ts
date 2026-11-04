@@ -1,4 +1,5 @@
 import { hexToRgb } from './compositor';
+import { decodeSrgb, encodeSrgb } from './srgb';
 
 /**
  * Kubelka-Munk spectral mixing, approximated per RGB channel (a 3-channel
@@ -107,6 +108,92 @@ export function kmMixPixels(
       out[i] = paperR;
       out[i + 1] = paperG;
       out[i + 2] = paperB;
+    }
+    out[i + 3] = 255;
+  }
+}
+
+export interface KMCoverageLayer extends KMLayer {
+  /** Density of one of the layer's dots: its opacity, as halftone dots are solid. */
+  dotDensity: number;
+}
+
+/**
+ * Mix a strip of *shrunk halftone* pixels the way the eye sees the print.
+ * At full size every dot is solid, so each spot on the paper is bare, one
+ * ink, or an overprint, each with its own KM colour; the eye averages those
+ * colours. Shrinking first averages each layer's dots into partial density,
+ * and KM-mixing that (kmMixPixels) gives half-strength ink everywhere: far
+ * darker and muddier than half the paper under full-strength dots, with the
+ * stronger ink swallowing the others.
+ *
+ * So read each layer's density as the fraction of the pixel its dots cover,
+ * and average, in linear light, the KM colour of every combination of inks
+ * weighted by how much of the pixel it would cover (Neugebauer mixing). The
+ * layers' dots are taken to fall independently of each other, true of grain
+ * and of dot screens at different angles. Same pixels and output as
+ * kmMixPixels.
+ */
+export function kmMixCoverage(
+  layers: KMCoverageLayer[],
+  paperKS: readonly [number, number, number],
+  out: Uint8ClampedArray,
+): void {
+  // Linear colour of every overprint combination: bit i of the index set
+  // means layer i's ink is there, at full dot density.
+  const combos = 1 << layers.length;
+  const comboColour = new Float64Array(combos * 3);
+  for (let mask = 0; mask < combos; mask++) {
+    for (let c = 0; c < 3; c++) {
+      let ks = paperKS[c];
+      layers.forEach((layer, i) => {
+        if (mask & (1 << i)) ks += layer.dotDensity * layer.weight * layer.ks[c];
+      });
+      comboColour[mask * 3 + c] = decodeSrgb(reflectanceFromKS(ks));
+    }
+  }
+  const paper = [0, 1, 2].map((c) => encodeSrgb(comboColour[c]));
+
+  // How much of the pixel each combination covers, built up layer by layer:
+  // each inked layer splits every combination so far into with and without it.
+  const share = new Float64Array(combos);
+  const which = new Int32Array(combos);
+
+  const count = out.length / 4;
+  for (let p = 0; p < count; p++) {
+    const i = p * 4;
+    let n = 1;
+    share[0] = 1;
+    which[0] = 0;
+    for (let l = 0; l < layers.length; l++) {
+      const layer = layers[l];
+      if (layer.dotDensity <= 0) continue;
+      const coverage = Math.min(1, (255 - layer.data[i]) / 255 / layer.dotDensity);
+      if (coverage <= 0) continue;
+      const bit = 1 << l;
+      for (let k = 0; k < n; k++) {
+        share[n + k] = share[k] * coverage;
+        which[n + k] = which[k] | bit;
+        share[k] *= 1 - coverage;
+      }
+      n *= 2;
+    }
+
+    if (n === 1) {
+      out[i] = paper[0];
+      out[i + 1] = paper[1];
+      out[i + 2] = paper[2];
+    } else {
+      let r = 0, g = 0, b = 0;
+      for (let k = 0; k < n; k++) {
+        const o = which[k] * 3;
+        r += share[k] * comboColour[o];
+        g += share[k] * comboColour[o + 1];
+        b += share[k] * comboColour[o + 2];
+      }
+      out[i] = encodeSrgb(r);
+      out[i + 1] = encodeSrgb(g);
+      out[i + 2] = encodeSrgb(b);
     }
     out[i + 3] = 255;
   }

@@ -1,18 +1,18 @@
 import { Layer, RisoConfig } from '../types';
-import { computeLayerPlacement, prefilterForScale } from './compositor';
+import { computeLayerPlacement, prefilterForOctave } from './compositor';
 
 // Insides of each layer are drawn faintly so the coloured outlines read as the
 // primary element. Multiply at low opacity darkens the paper just enough to
 // show what's where without competing with the frames.
 const INSIDES_OPACITY = 0.4;
 
-// Outline stroke widths in canvas (backing-store) px — constant regardless of
-// fit scale, so frames stay legible at any paper size.
+// Outline stroke widths in CSS px — constant regardless of fit scale, so
+// frames stay legible at any paper size.
 const OUTLINE_WIDTH = 1.5;
 const OUTLINE_WIDTH_SELECTED = 3;
 
 // Small filled squares at the selected layer's corners, hinting they're grab
-// handles for resizing. Side in canvas px.
+// handles for resizing. Side in CSS px.
 const HANDLE_SIZE = 6;
 
 // Per-layer scale is clamped to the Scale slider's range (10%–200%) so a
@@ -35,7 +35,9 @@ export function composePlacementConfig(config: RisoConfig): RisoConfig {
  * Outline (compose) render: a light-table view of the layers. Paper
  * background, then each visible layer drawn as its artwork faintly multiplied
  * inside a stroked bounding rectangle in the layer's ink colour. The selected
- * layer gets a bolder stroke. Preview-only — never exported.
+ * layer gets a bolder stroke. Preview-only — never exported. `strokeScale`
+ * (backing px per CSS px) keeps strokes and handles the same on-screen size
+ * at any pixel density.
  */
 export function compositeOutline(
   layers: Layer[],
@@ -44,6 +46,7 @@ export function compositeOutline(
   targetH: number,
   fullW: number,
   selectedId: string | null,
+  strokeScale = 1,
 ): HTMLCanvasElement {
   const scale = targetW / fullW;
   const margin = Math.round((config.margin ?? 0) * scale);
@@ -76,7 +79,7 @@ export function compositeOutline(
     // Faint greyscale insides (raw density, no halftone/tint) so the artwork is
     // recognisable while positioning.
     const effScale = drawW / layer.grayscaleData.width;
-    const src = prefilterForScale(layer.grayscaleData, effScale);
+    const src = prefilterForOctave(layer.grayscaleData, effScale, true);
     ctx.save();
     ctx.globalAlpha = INSIDES_OPACITY;
     ctx.globalCompositeOperation = 'multiply';
@@ -90,11 +93,11 @@ export function compositeOutline(
     const selected = layer.id === selectedId;
     ctx.save();
     ctx.strokeStyle = layer.inkColor.hex;
-    ctx.lineWidth = selected ? OUTLINE_WIDTH_SELECTED : OUTLINE_WIDTH;
+    ctx.lineWidth = (selected ? OUTLINE_WIDTH_SELECTED : OUTLINE_WIDTH) * strokeScale;
     ctx.strokeRect(drawX, drawY, drawW, drawH);
     if (selected) {
       ctx.fillStyle = layer.inkColor.hex;
-      const h = HANDLE_SIZE;
+      const h = HANDLE_SIZE * strokeScale;
       for (const [cx, cy] of [
         [drawX, drawY],
         [drawX + drawW, drawY],

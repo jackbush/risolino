@@ -1,8 +1,9 @@
 import { Layer, RisoConfig } from '../types';
 import { densityBoxBlur } from './blur';
 import { applyAMHalftone, applyStochasticHalftone, autoScreenAngle } from './halftone';
-import { KMLayer, kmMixPixels, ksFromHex, orderWeight } from './kubelkaMunk';
+import { KMCoverageLayer, kmMixCoverage, kmMixPixels, ksFromHex, orderWeight } from './kubelkaMunk';
 import { computeRegistrationJitter } from './prng';
+import { downscale } from './downscale';
 
 /**
  * Parse a hex color string to [R, G, B] values (0-255). Accepts #RRGGBB and
@@ -309,34 +310,54 @@ function applyPlacementRotation(ctx: CanvasRenderingContext2D, p: LayerPlacement
 }
 
 /**
- * Prepare a layer image for drawing at `effectiveScale`. Canvas bilinear
- * filtering samples only a 2×2 tap, so a single drawImage below half size
- * skips source pixels — and skipping through a binary halftone stipple
- * aliases into strong moiré that varies with the fit-preview scale. Halve the
- * canvas (a proper 2×2 average each step) until the remaining draw scale is
- * ≥ 0.5, so the final drawImage filters every source pixel. No-op at scale
- * ≥ 0.5, so 100% view and export are untouched.
+ * Prepare a layer image for drawing at `effectiveScale`: below full size,
+ * an antialiased copy at exactly the size it will be drawn (see downscale.ts),
+ * so the final drawImage is ~1:1 and resamples nothing. Canvas filtering
+ * alone takes a 2×2 tap, which skips through a binary halftone stipple and
+ * aliases into moiré that changes with the fit-preview scale. At full size
+ * it's the image itself, so the 100% view and export are untouched.
+ *
+ * @param linearLight - The image is colour (tinted ink) rather than density;
+ *   see `downscale`.
  */
-const prefilterCache = new WeakMap<ImageData, Map<number, HTMLCanvasElement>>();
+const prefilterCache = new WeakMap<ImageData, Map<string, HTMLCanvasElement>>();
 
-export function prefilterForScale(img: ImageData, effectiveScale: number): HTMLCanvasElement {
-  // Number of halvings needed; every scale in the same octave shares a result
+export function prefilterForScale(
+  img: ImageData,
+  effectiveScale: number,
+  linearLight: boolean,
+): HTMLCanvasElement {
+  const outW = Math.max(1, Math.min(img.width, Math.round(img.width * effectiveScale)));
+  const outH = Math.max(1, Math.min(img.height, Math.round(img.height * effectiveScale)));
+  return lruGet(cacheFor(prefilterCache, img), `${outW}x${outH}`, () =>
+    imageDataToCanvas(
+      outW === img.width && outH === img.height ? img : downscale(img, outW, outH, linearLight),
+    ),
+  );
+}
+
+/**
+ * A cheaper cousin of `prefilterForScale` for drawing that changes size
+ * continuously, like a compose-mode corner drag: the antialiased copy is the
+ * smallest power-of-two reduction still at least the drawn size, so a drag
+ * within one octave reuses it and drawImage does the last ≤ 2× itself.
+ */
+const octaveCache = new WeakMap<ImageData, Map<number, HTMLCanvasElement>>();
+
+export function prefilterForOctave(
+  img: ImageData,
+  effectiveScale: number,
+  linearLight: boolean,
+): HTMLCanvasElement {
   let levels = 0;
   for (let s = effectiveScale; s < 0.5; s *= 2) levels++;
-
-  return lruGet(cacheFor(prefilterCache, img), levels, () => {
-    let canvas = imageDataToCanvas(img);
-    for (let l = 0; l < levels; l++) {
-      const half = document.createElement('canvas');
-      half.width = Math.max(1, Math.ceil(canvas.width / 2));
-      half.height = Math.max(1, Math.ceil(canvas.height / 2));
-      const hctx = half.getContext('2d')!;
-      hctx.imageSmoothingEnabled = true;
-      hctx.imageSmoothingQuality = 'high';
-      hctx.drawImage(canvas, 0, 0, half.width, half.height);
-      canvas = half;
-    }
-    return canvas;
+  return lruGet(cacheFor(octaveCache, img), levels, () => {
+    const f = 2 ** levels;
+    return imageDataToCanvas(
+      levels === 0
+        ? img
+        : downscale(img, Math.max(1, Math.ceil(img.width / f)), Math.max(1, Math.ceil(img.height / f)), linearLight),
+    );
   });
 }
 
@@ -407,7 +428,7 @@ export function composite(
     );
     const { drawX, drawY, drawW, drawH } = placement;
     const effScale = drawW / tinted.width;
-    const tmp = prefilterForScale(tinted, effScale);
+    const tmp = prefilterForScale(tinted, effScale, true);
 
     ctx.save();
     applyPlacementRotation(ctx, placement);
@@ -427,7 +448,7 @@ export function composite(
 
       if (transparency < 1) {
         const alphaTinted = tintStage(density, layer.inkColor.hex, 'alpha');
-        const tmpAlpha = prefilterForScale(alphaTinted, effScale);
+        const tmpAlpha = prefilterForScale(alphaTinted, effScale, true);
         ctx.globalAlpha = layer.opacity * (1 - transparency);
         ctx.globalCompositeOperation = 'source-over';
         ctx.drawImage(tmpAlpha, drawX, drawY, drawW, drawH);
@@ -503,7 +524,7 @@ function kmComposite(
     );
     const effScale = placement.drawW / density.width;
     return {
-      src: prefilterForScale(density, effScale),
+      src: prefilterForScale(density, effScale, false),
       placement,
       effScale,
       opacity: layer.opacity,
@@ -518,11 +539,12 @@ function kmComposite(
   const stripCtx = strip.getContext('2d', { willReadFrequently: true })!;
 
   const paperKS = ksFromHex(config.paperColor);
+  const shrunkDots = config.halftoneMode !== 'off' && scale < 1;
 
   for (let y0 = 0; y0 < height; y0 += KM_STRIP_ROWS) {
     const rows = Math.min(KM_STRIP_ROWS, height - y0);
 
-    const kmLayers: KMLayer[] = prepared.map((p) => {
+    const kmLayers: KMCoverageLayer[] = prepared.map((p) => {
       stripCtx.save();
       // White = zero density; also the value outside the safe-area clip
       stripCtx.fillStyle = '#FFFFFF';
@@ -546,11 +568,16 @@ function kmComposite(
         data: stripCtx.getImageData(0, 0, width, rows).data,
         ks: p.ks,
         weight: p.weight,
+        dotDensity: p.opacity,
       };
     });
 
     const out = ctx.createImageData(width, rows);
-    kmMixPixels(kmLayers, paperKS, out.data);
+    // Shrunk halftone dots are coverage, not partial ink (see kmMixCoverage).
+    // At full size they're solid already, and continuous tone is real
+    // partial ink, so both mix as they are.
+    if (shrunkDots) kmMixCoverage(kmLayers, paperKS, out.data);
+    else kmMixPixels(kmLayers, paperKS, out.data);
     ctx.putImageData(out, 0, y0);
   }
 

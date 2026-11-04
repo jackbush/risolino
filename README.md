@@ -11,13 +11,13 @@ New to it? The [manual](https://jackbush.github.io/risolino/manual/) walks throu
 1. **Drag images (or a PDF) onto the page.** Each image (or PDF page) becomes a layer.
 2. **Click a layer's colour strip** and pick an ink. The palette is based on real riso inks.
 3. **Fiddle with the setup** until it feels like a print, not a screen.
-4. **Check the details** The zoomed-out preview can shimmer. Click on the preview (or hit **100%**) to inspect and pan around.
+4. **Check the details** The zoomed-out preview smooths dots too fine for your screen into flat tone. Click on the preview (or hit **100%**) to see the real dots and pan around.
 5. **Compose** (bottom left) turns the preview into a light-table: every layer becomes a coloured outline with its artwork faintly showing through. Pick a layer in the sidebar, then drag it around the canvas to reposition it or drag a corner to resize it — the offset and scale values update as you go. Hit **Exit compose mode** when you're happy.
 6. **Download** a full-resolution PNG.
 
 Layers turn grayscale on import: dark areas become heavy ink, light areas become bare paper. It's how a real riso sees your artwork, one colour separation at a time. Drag the handle to reorder layers (they print bottom to top), click the name to rename, click the thumbnail to swap the image.
 
-**On a phone** (or any narrow or portrait screen) the preview sits on top and the controls underneath, with **Layers** and **Setup** as tabs. No dragging files in, so tap **Choose files** — snap a drawing with the camera, or pick from your photos. At 100% the print fills the whole screen behind the controls. Compose works by finger too.
+**On a phone** (or any narrow or portrait screen) the preview sits on top and the controls underneath, with **Layers** and **Setup** as tabs. No dragging files in, so tap **Choose files** — snap a drawing with the camera, or pick from your photos. The chevron folds the controls down to give the preview the screen, and at 100% the print fills the whole screen behind them. Compose works by finger too.
 
 **Advanced layer options**, at the foot of the Layers panel once you have a layer, reveals per-layer opacity, scale, and X/Y offset boxes on each layer, maybe too much control. (Compose mode sets scale and offset for you by dragging — see below — so you don't have to poke numbers unless you want to.)
 
@@ -71,7 +71,8 @@ upload → toGrayscale ─→ spread (blur.ts) ─→ halftone (halftone.ts) ─
 
 - **Everything is full-resolution pixels, no DPI anywhere.** Effects run on full-res data *before* the preview downscale — never scale an effect radius by render scale, that double-applies it.
 - **Randomness is always seeded**, keyed by layer id (not index, so reordering doesn't reshuffle jitter). The export reuses the preview's seed and matches it exactly.
-- **Heavy stages are cached** in `WeakMap`s chained stage to stage (spread → halftone → tint → downscale prefilter), LRU-capped so slider-dragging can't hoard full-res buffers.
+- **Heavy stages are cached** in `WeakMap`s chained stage to stage (spread → halftone → tint → preview downscale), LRU-capped so slider-dragging can't hoard full-res buffers.
 - **The KM path doesn't reimplement geometry** — it rasterizes density with the same shared placement code as the multiply path, then mixes per-pixel in 256-row strips so export memory stays sane.
+- **The fit preview is drawn in device pixels** and each layer is shrunk with a Gaussian (`downscale.ts`), in linear light for colour. Dots the screen can resolve stay dots and finer ones become flat tone; canvas `drawImage` alone samples a 2×2 tap and turns fine halftones into moiré. With Realistic blending, shrunk dots are then mixed as coverage, not as partial ink (`kmMixCoverage`): KM-mixing averaged density reads far darker, the strongest ink swallowing the rest.
 - **jsdom has no canvas**, so keep maths in pure functions over typed arrays where vitest can reach it; the canvas plumbing is verified in the browser.
 - A new effect gets: a `RisoConfig` field, a default in `App.tsx`, a ConfigPanel control, a pipeline stage (not conditionals sprinkled through `composite()`), and tests.

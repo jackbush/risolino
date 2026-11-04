@@ -68,19 +68,20 @@ export function render(
 /**
  * Compose (outline) render: preview-only light-table view. Sizes the canvas
  * like `render()` but delegates to the outline compositor. `selectedId` bolds
- * one layer's frame.
+ * one layer's frame; `strokeScale` is backing px per CSS px.
  */
 export function renderOutline(
   layers: Layer[],
   config: RisoConfig,
   selectedId: string | null,
   scale = 1,
+  strokeScale = 1,
 ): HTMLCanvasElement {
   const { width: fullW, height: fullH } = getCompositeDimensions(layers, config.paperSize);
   const targetW = Math.round(fullW * scale);
   const targetH = Math.round(fullH * scale);
 
-  return compositeOutline(layers, config, targetW, targetH, fullW, selectedId);
+  return compositeOutline(layers, config, targetW, targetH, fullW, selectedId, strokeScale);
 }
 
 /**

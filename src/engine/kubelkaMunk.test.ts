@@ -5,9 +5,11 @@ import {
   ksFromHex,
   orderWeight,
   kmMixPixels,
+  kmMixCoverage,
   KMLayer,
 } from './kubelkaMunk';
 import { hexToRgb } from './compositor';
+import { decodeSrgb } from './srgb';
 
 // ------- K/S ↔ reflectance -------
 
@@ -144,5 +146,66 @@ describe('kmMixPixels', () => {
     );
     expect(out[3]).toBe(255);
     expect(out[7]).toBe(255);
+  });
+});
+
+describe('kmMixCoverage', () => {
+  const paperKS = ksFromHex('#FFFDF5');
+  const red = { ks: ksFromHex('#E45D50'), weight: 1, dotDensity: 1 };
+  const blue = { ks: ksFromHex('#3255A4'), weight: 1, dotDensity: 1 };
+
+  /** One pixel per entry; each layer's density (0–1) for that pixel. */
+  function strip(densities: number[]): Uint8ClampedArray {
+    const d = new Uint8ClampedArray(densities.length * 4);
+    densities.forEach((v, p) => d.fill(Math.round(255 - v * 255), p * 4, p * 4 + 4));
+    return d;
+  }
+  const lin = (v: number) => decodeSrgb(v / 255);
+
+  it('matches plain KM mixing where dots are solid or absent', () => {
+    const a = strip([0, 1, 0, 1]);
+    const b = strip([0, 0, 1, 1]);
+    const plain = new Uint8ClampedArray(16);
+    const coverage = new Uint8ClampedArray(16);
+    kmMixPixels([{ ...red, data: a }, { ...blue, data: b }], paperKS, plain);
+    kmMixCoverage([{ ...red, data: a }, { ...blue, data: b }], paperKS, coverage);
+    for (let i = 0; i < 16; i++) expect(Math.abs(coverage[i] - plain[i])).toBeLessThanOrEqual(1);
+  });
+
+  it('averages half-covered paper with the ink in linear light, not half-strength ink', () => {
+    const solid = new Uint8ClampedArray(8);
+    kmMixPixels([{ ...red, data: strip([0, 1]) }], paperKS, solid);
+    const half = new Uint8ClampedArray(4);
+    kmMixCoverage([{ ...red, data: strip([0.5]) }], paperKS, half);
+    for (let c = 0; c < 3; c++) {
+      expect(lin(half[c])).toBeCloseTo((lin(solid[c]) + lin(solid[4 + c])) / 2, 2);
+    }
+    // KM of half-strength ink is darker than the dots it stands for
+    const muddy = new Uint8ClampedArray(4);
+    kmMixPixels([{ ...red, data: strip([0.5]) }], paperKS, muddy);
+    expect(muddy[1]).toBeLessThan(half[1]);
+  });
+
+  it('splits two half-covering layers into a quarter each of paper, red, blue and overprint', () => {
+    const solid = new Uint8ClampedArray(16);
+    kmMixPixels([{ ...red, data: strip([0, 1, 0, 1]) }, { ...blue, data: strip([0, 0, 1, 1]) }], paperKS, solid);
+    const mixed = new Uint8ClampedArray(4);
+    kmMixCoverage([{ ...red, data: strip([0.5]) }, { ...blue, data: strip([0.5]) }], paperKS, mixed);
+    for (let c = 0; c < 3; c++) {
+      const expected = [0, 4, 8, 12].reduce((s, o) => s + lin(solid[o + c]), 0) / 4;
+      expect(lin(mixed[c])).toBeCloseTo(expected, 2);
+    }
+  });
+
+  it('reads density as coverage of dots that are only as dense as the layer opacity', () => {
+    // At 50% opacity a solid dot has density 0.5; density 0.25 is half coverage
+    const faint = { ...red, dotDensity: 0.5 };
+    const solid = new Uint8ClampedArray(8);
+    kmMixPixels([{ ...red, data: strip([0, 0.5]) }], paperKS, solid);
+    const half = new Uint8ClampedArray(4);
+    kmMixCoverage([{ ...faint, data: strip([0.25]) }], paperKS, half);
+    for (let c = 0; c < 3; c++) {
+      expect(lin(half[c])).toBeCloseTo((lin(solid[c]) + lin(solid[4 + c])) / 2, 2);
+    }
   });
 });

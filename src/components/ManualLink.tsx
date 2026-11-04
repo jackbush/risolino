@@ -34,3 +34,12 @@ export function NewTabArrow({ className, size }: { className?: string; size: num
     </svg>
   );
 }
+
+/** An up-pointing chevron; CSS turns it to show which way its panel will go. */
+export function Chevron({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" width={20} height={20} aria-hidden="true">
+      <path d="M4.5 12.5 10 7l5.5 5.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
+    </svg>
+  );
+}

@@ -13,7 +13,7 @@ export interface RenderPipelineControls {
   setCenterFraction: (fx: number, fy: number) => void;
   /** Current viewport center as fractions (0-1) of the composite. */
   getCenterFraction: () => { fx: number; fy: number };
-  /** Fit scale (canvas px per full-res px) of the last render. 1 in 100% mode. */
+  /** Fit scale (canvas backing px per full-res px) of the last render. 1 in 100% mode. */
   getResultScale: () => number;
 }
 
@@ -22,11 +22,12 @@ export interface RenderPipelineControls {
  *
  * Re-composites whenever layers, config, or the zoom mode change, into an
  * offscreen result canvas — fit-scaled in 'fit' mode, full-resolution in
- * 'full' (100%) mode — then presents it on the display canvas. In full mode
- * the display canvas is sized in physical device pixels (1 image px = 1
- * device px, so halftone dots appear exactly as exported) and shows a
- * pannable viewport; panning only re-blits the cached full-res result, it
- * never re-composites.
+ * 'full' (100%) mode — then presents it on the display canvas. Both are sized
+ * in physical device pixels. In fit mode that lets the screen show every dot
+ * it can resolve rather than a CSS-pixel render stretched to fill it; in full
+ * mode 1 image px = 1 device px, so halftone dots appear exactly as exported,
+ * in a pannable viewport. Panning only re-blits the cached full-res result,
+ * it never re-composites.
  */
 export function useRenderPipeline(
   layers: Layer[],
@@ -60,6 +61,8 @@ export function useRenderPipeline(
   // returns to the same spot).
   const resultRef = useRef<HTMLCanvasElement | null>(null);
   const resultScaleRef = useRef(1);
+  // CSS size the fit-mode result is shown at.
+  const fitDisplayRef = useRef({ width: 0, height: 0 });
   const centerRef = useRef({ fx: 0.5, fy: 0.5 });
 
   /** Blit resultRef onto the display canvas according to the current mode. */
@@ -72,6 +75,8 @@ export function useRenderPipeline(
     if (modeRef.current === 'fit') {
       if (canvas.width !== result.width) canvas.width = result.width;
       if (canvas.height !== result.height) canvas.height = result.height;
+      canvas.style.width = `${fitDisplayRef.current.width}px`;
+      canvas.style.height = `${fitDisplayRef.current.height}px`;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       ctx.drawImage(result, 0, 0);
@@ -83,6 +88,8 @@ export function useRenderPipeline(
     // wrong, its small dimensions would make the clamp below overwrite the
     // freshly clicked-in center. Wait for the full-res render to land.
     if (resultScaleRef.current !== 1) return;
+    canvas.style.width = '';
+    canvas.style.height = '';
     const dpr = window.devicePixelRatio || 1;
     const viewW = Math.max(1, Math.round(container.clientWidth * dpr));
     const viewH = Math.max(1, Math.round(container.clientHeight * dpr));
@@ -129,6 +136,7 @@ export function useRenderPipeline(
       if (!currentLayers.some((l) => l.grayscaleData)) return;
 
       let scale = 1;
+      let strokeScale = 1;
       if (modeRef.current === 'fit' || composeModeRef.current) {
         const { width: fullW, height: fullH } = getCompositeDimensions(
           currentLayers,
@@ -140,15 +148,23 @@ export function useRenderPipeline(
         const rect = container.getBoundingClientRect();
         const padding = 32;
         const margin2 = 2 * (configRef.current.margin ?? 0);
-        scale = Math.min(
+        // CSS px per full-res px: shown no larger than 1:1 …
+        const cssScale = Math.min(
           (rect.width - padding) / (fullW + margin2),
           (rect.height - padding) / (fullH + margin2),
           1,
         );
+        // … and drawn at one backing px per device px, never past full res.
+        scale = Math.min(cssScale * (window.devicePixelRatio || 1), 1);
+        strokeScale = scale / cssScale;
+        fitDisplayRef.current = {
+          width: (fullW + margin2) * cssScale,
+          height: (fullH + margin2) * cssScale,
+        };
       }
 
       resultRef.current = composeModeRef.current
-        ? renderOutline(currentLayers, configRef.current, selectedLayerIdRef.current, scale)
+        ? renderOutline(currentLayers, configRef.current, selectedLayerIdRef.current, scale, strokeScale)
         : render(currentLayers, configRef.current, scale);
       resultScaleRef.current = scale;
       present();

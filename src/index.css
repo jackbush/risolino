@@ -382,6 +382,9 @@ body {
 }
 
 .pane-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-family: 'Michroma', sans-serif;
   font-size: 1.5rem;
   line-height: 1.2;
@@ -397,6 +400,23 @@ body {
 
 .pane-summary::before {
   display: none;
+}
+
+/* Points the way its panel will go: up to fold an open desktop pane away,
+   down to open it again (the phone pane, folding downwards, flips this). */
+.pane-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+details.pane:not([open]) .pane-chevron,
+.pane--tabbed:not(.pane--collapsed) .pane-chevron {
+  transform: rotate(180deg);
+}
+
+.pane-summary:hover .pane-chevron,
+.pane-collapse:hover .pane-chevron {
+  opacity: 0.4;
 }
 
 /* Manual card: the first thing in the sidebar, whole card is the link. */
@@ -939,14 +959,19 @@ button:disabled {
 
 .app--mobile {
   --swatch-size: 36px;
+  --pad-top: max(var(--spacing-md), env(safe-area-inset-top));
+  --pad-right: max(var(--spacing-md), env(safe-area-inset-right));
+  --pad-left: max(var(--spacing-md), env(safe-area-inset-left));
   height: 100dvh;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  padding:
-    max(var(--spacing-md), env(safe-area-inset-top))
-    max(var(--spacing-md), env(safe-area-inset-right))
-    max(var(--spacing-md), env(safe-area-inset-bottom))
-    max(var(--spacing-md), env(safe-area-inset-left));
+  padding: var(--pad-top) var(--pad-right) max(var(--spacing-md), env(safe-area-inset-bottom))
+    var(--pad-left);
+}
+
+/* Controls folded down to their tabs: the preview takes the rest. */
+.app--mobile:has(.pane--collapsed) {
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 /* Nothing to set before there's artwork: the panel is gone (App.tsx) and
@@ -976,21 +1001,25 @@ button:disabled {
   padding-top: var(--spacing-md);
 }
 
-/* Bars at the top and foot of the preview half, even once the stage has
-   left the flow at 100%. */
+/* Bars at the top and foot of the preview, even once the stage has left
+   the flow at 100%. */
 .app--mobile .preview-pane {
+  position: relative;
   justify-content: space-between;
 }
 
-/* 100%: the sheet slides under everything, edge to edge. The stage bleeds
-   past the screen so that its centre (the point zooming pivots on and
-   panning is clamped to) stays the middle of the preview half, ~25dvh. */
+/* 100%: the sheet slides under everything, edge to edge. The stage reaches
+   the screen's sides and bottom, and as far again above the pane as below
+   it, so its centre (the point zooming pivots on and panning is clamped to)
+   stays the middle of the preview, the controls open or folded. In these
+   offsets 100% is the pane's height, so 100% + pad-top − 100dvh is minus
+   the distance from the pane's foot to the screen's. */
 .app--mobile.app--zoom-full .preview-stage {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: -50dvh;
-  height: 150dvh;
+  position: absolute;
+  left: calc(-1 * var(--pad-left));
+  right: calc(-1 * var(--pad-right));
+  top: calc(100% + var(--pad-top) - 100dvh);
+  bottom: calc(100% + var(--pad-top) - 100dvh);
 }
 
 .app--mobile .zoom-btn {
@@ -1052,11 +1081,33 @@ button:disabled {
   overflow: hidden;
 }
 
-.pane-tabs {
+.pane-header {
   flex-shrink: 0;
   display: flex;
-  gap: 1.4rem;
+  align-items: center;
+  justify-content: space-between;
   padding: 0 var(--spacing-md);
+}
+
+.pane-tabs {
+  display: flex;
+  gap: 1.4rem;
+}
+
+/* A finger-sized target around the chevron, its icon flush with the pane's
+   inner edge like the desktop panes'. */
+.pane-collapse,
+.pane-collapse:hover,
+.pane-collapse:active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -12px;
+  padding: 0;
+  background: none;
+  color: var(--color-fg);
 }
 
 /* Set like the desktop pane titles; the open one is inked and underlined
