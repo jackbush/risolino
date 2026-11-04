@@ -106,8 +106,11 @@ a:hover {
   cursor: pointer;
 }
 
-.side-toggle:hover {
-  background: var(--tint);
+/* Touch screens keep :hover after a tap; only a pointer that hovers gets it. */
+@media (hover: hover) {
+  .side-toggle:hover {
+    background: var(--tint);
+  }
 }
 
 .side-toggle[aria-expanded='true'] {
@@ -341,16 +344,12 @@ p + .setting {
     grid-template-columns: 1fr;
   }
 
-  /* The title bar stays put and the page scrolls behind it. Its shadow is a
-     solid block of paper filling the gap above it, so text passing under
-     the bar doesn't show again above it. Opened, the contents scroll
-     inside it. */
+  /* The title bar stays put and the page scrolls behind it. */
   .side {
     z-index: 1;
     height: auto;
-    max-height: calc(100dvh - 2 * var(--edge));
     padding: 0.75rem;
-    box-shadow: 0 calc(-1 * var(--edge)) 0 var(--edge) var(--paper);
+    overflow: visible;
   }
 
   .side-heading {
@@ -360,6 +359,29 @@ p + .setting {
   /* The contents fold away behind the button (manual.ts toggles it). */
   .side-toggle {
     display: inline-flex;
+  }
+
+  /* Opened, they drop down over the page as part of the bar, without the
+     bar growing, so the page underneath never moves. Too long for the
+     screen, they scroll on their own. 100% is the bar's height. */
+  .side--open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .side-contents {
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    right: -1px;
+    max-height: calc(100dvh - 100% - 2 * var(--edge));
+    padding: 0 0.75rem 0.75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
   }
 
   .side:not(.side--open) .side-contents {
