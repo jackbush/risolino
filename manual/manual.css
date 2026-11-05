@@ -404,3 +404,23 @@ p + .setting {
     grid-template-columns: 1fr;
   }
 }
+
+/* Ko-fi's widget only anchors bottom-left; `body` outranks its stylesheet, which loads after this one. */
+body .floatingchat-container-wrap,
+body .floatingchat-container-wrap-mobi,
+body .floating-chat-kofi-popup-iframe,
+body .floating-chat-kofi-popup-iframe-mobi {
+  left: auto;
+  right: var(--edge);
+}
+
+body .floatingchat-container-wrap,
+body .floatingchat-container-wrap-mobi {
+  bottom: var(--edge);
+}
+
+/* Its button frame is wider than the box around it, which pushes the button off the right edge. */
+body .floatingchat-container,
+body .floatingchat-container-mobi {
+  width: 100%;
+}

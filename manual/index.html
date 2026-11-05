@@ -575,5 +575,20 @@
         </div>
 
         <script type="module" src="./manual.ts"></script>
+        <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+        <script>
+            kofiWidgetOverlay.draw('jjjack', {
+                type: 'floating-chat',
+                'floating-chat.donateButton.text': 'Donate',
+                'floating-chat.donateButton.background-color': '#FF585B',
+                'floating-chat.donateButton.text-color': '#fff',
+                // Loaded into the button's iframe as well as the page: pins the button to the
+                // right of its box, to match the bottom-right override in manual.css.
+                'floating-chat.stylesheets': JSON.stringify([
+                    'https://fonts.googleapis.com/css?family=DM+Sans:400,600,700,800&display=swap',
+                    'data:text/css,body{right:0}',
+                ]),
+            })
+        </script>
     </body>
 </html>
