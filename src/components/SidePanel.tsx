@@ -130,7 +130,7 @@ export function SidePanel({
 
   return (
     <div className="side-panel">
-      <a className="pane manual-card" href={manualUrl('page')} target="_blank" rel="noopener noreferrer">
+      <a className="pane manual-card" href={manualUrl('start')} target="_blank" rel="noopener noreferrer">
         Manual
         <NewTabArrow className="manual-card-icon" size={20} />
         <span className="visually-hidden">(opens in a new tab)</span>

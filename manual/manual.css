@@ -242,6 +242,20 @@ li + li {
   margin-top: 0.4rem;
 }
 
+/* Getting started: each page's name, its first sentence underneath. */
+.overview li + li {
+  margin-top: 0.85rem;
+}
+
+.overview a {
+  font-weight: 500;
+}
+
+.overview span {
+  display: block;
+  color: var(--ink-soft);
+}
+
 .plate {
   margin: 1.5rem 0;
 }

@@ -521,7 +521,7 @@ export function PreviewPane({
     <div className="preview-pane">
       {mobile && (
         <div className="preview-bar">
-          <a className="zoom-btn manual-btn" href={manualUrl('page')} target="_blank" rel="noopener noreferrer">
+          <a className="zoom-btn manual-btn" href={manualUrl('start')} target="_blank" rel="noopener noreferrer">
             Manual
             <NewTabArrow size={14} />
             <span className="visually-hidden">(opens in a new tab)</span>

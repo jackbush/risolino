@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>Graphic print · Risolino manual</title>
+        <title>Getting started · Risolino manual</title>
         <meta
             name="description"
             content="From a drawing to a riso-style print: draw each ink as its own sheet, scan them with your phone, and overprint them in Risolino."
@@ -50,6 +50,12 @@
                 </div>
 
                 <div class="side-contents" id="side-contents">
+                    <ul>
+                        <li>
+                            <a href="#start">Getting started<span>What's in the manual</span></a>
+                        </li>
+                    </ul>
+
                     <p class="side-group" id="nav-walkthroughs">Walkthroughs</p>
                     <ul aria-labelledby="nav-walkthroughs">
                         <li>
@@ -79,12 +85,63 @@
             </nav>
 
             <main class="manual">
+                <!-- Every page gets a line here, under its sidebar group, with the first sentence of its lead. -->
+                <article id="start" class="page" data-title="Getting started">
+                    <header>
+                        <h1 tabindex="-1">Getting started</h1>
+                        <p class="lead">
+                            Risolino turns your drawings and photos into something that looks like a riso print. If it's your first go,
+                            follow a walkthrough. Come back to the settings when you want to know what a slider actually does.
+                        </p>
+                    </header>
+
+                    <section>
+                        <h2>Walkthroughs</h2>
+                        <ul class="overview">
+                            <li>
+                                <a href="#graphic">Graphic print</a>
+                                <span>Chunky shapes and one big word, overprinted until the inks run into each other.</span>
+                            </li>
+                            <li>
+                                <a href="#mushroom">Mushroom print</a>
+                                <span>A mushroom, from a reference photo to a finished print: two drawings, a phone scan and a few minutes in Risolino.</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Settings</h2>
+                        <p>
+                            Every control in Risolino, grouped by what it changes. The defaults already make a good print, so change one thing
+                            at a time and see what happens. Each control has a <b>Start with</b> note: where to begin, and when it's worth changing.
+                        </p>
+                        <ul class="overview">
+                            <li>
+                                <a href="#page">Page</a>
+                                <span>The buttons under the preview, for zooming in, re-rolling the misalignment and downloading the print.</span>
+                            </li>
+                            <li>
+                                <a href="#paper">Paper</a>
+                                <span>The sheet you print on: its size and colour, and how your layers sit on it.</span>
+                            </li>
+                            <li>
+                                <a href="#ink">Ink</a>
+                                <span>How the ink behaves: how much it spreads, how it prints lighter tones, how badly the passes line up and how the colours mix.</span>
+                            </li>
+                            <li>
+                                <a href="#layers">Layers</a>
+                                <span>The controls on each layer, and how to move layers into place.</span>
+                            </li>
+                        </ul>
+                    </section>
+                </article>
+
                 <article id="graphic" class="page" data-title="Graphic print">
                     <header>
                         <h1 tabindex="-1">Graphic print</h1>
                         <p class="lead">
-                            Chunky shapes and one big word, overprinted until the inks run into each other. You need a thick marker,
-                            your phone and a font you like. No drawing skills needed.
+                            Chunky shapes and one big word, overprinted until the inks run into each other. All you need is a thick marker,
+                            your phone and a font you like. You don't have to be able to draw.
                         </p>
                     </header>
 
@@ -176,8 +233,8 @@
                     <header>
                         <h1 tabindex="-1">Mushroom print</h1>
                         <p class="lead">
-                            A riso prints one ink at a time, so you draw one sheet per ink. Here's a mushroom from start to finish:
-                            a photo, two drawings, a phone scan, and a few minutes in Risolino.
+                            A mushroom, from a reference photo to a finished print: two drawings, a phone scan and a few minutes in Risolino.
+                            A riso prints one ink at a time, so you draw one sheet for each colour.
                         </p>
                     </header>
 
@@ -315,13 +372,10 @@
                     <header>
                         <h1 tabindex="-1">Page</h1>
                         <p class="lead">
-                            Every control in Risolino, grouped by what it changes. This page covers the buttons under the preview, which act on the whole print.
-                            The defaults make a good print, so change one thing at a time and watch what it does.
+                            The buttons under the preview, for zooming in, re-rolling the misalignment and downloading the print.
+                            They act on the whole print rather than one layer.
                         </p>
                     </header>
-                    <p>
-                        Each control comes with a <b>Start with</b> suggestion: a safe place to begin, and when it's worth changing.
-                    </p>
 
                     <div class="setting">
                         <h2>Fit and 100%</h2>
@@ -356,7 +410,7 @@
                 <article id="paper" class="page" data-title="Paper">
                     <header>
                         <h1 tabindex="-1">Paper</h1>
-                        <p class="lead">The sheet you print on: how big it is, what colour it is, and how your layers sit on it.</p>
+                        <p class="lead">The sheet you print on: its size and colour, and how your layers sit on it.</p>
                     </header>
 
                         <div class="setting">
@@ -416,7 +470,7 @@
                 <article id="ink" class="page" data-title="Ink">
                     <header>
                         <h1 tabindex="-1">Ink</h1>
-                        <p class="lead">How the ink behaves: how far it spreads, how it prints lighter tones, how the passes line up and how colours mix.</p>
+                        <p class="lead">How the ink behaves: how much it spreads, how it prints lighter tones, how badly the passes line up and how the colours mix.</p>
                     </header>
 
                         <div class="setting">
@@ -477,7 +531,7 @@
                 <article id="layers" class="page" data-title="Layers">
                     <header>
                         <h1 tabindex="-1">Layers</h1>
-                        <p class="lead">The controls on each layer in the list, and how to move layers into place. Click a layer's name to rename it.</p>
+                        <p class="lead">The controls on each layer, and how to move layers into place. Click a layer's name to rename it.</p>
                     </header>
 
                     <div class="setting">
